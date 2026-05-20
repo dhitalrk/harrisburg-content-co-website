@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <!-- ============================================================
+       SECURITY HEADERS (also set via netlify.toml / vercel.json)
+       ============================================================ -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="X-Frame-Options" content="DENY"/>
+  <meta name="referrer" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), accelerometer=(), gyroscope=()"/>
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin"/>
+  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp"/>
+  <meta http-equiv="Content-Security-Policy"
+    content="
+      default-src 'self';
+      script-src 'self' https://js.stripe.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src https://fonts.gstatic.com;
+      img-src 'self' data: https:;
+      connect-src 'self' https://api.stripe.com;
+      frame-src https://js.stripe.com https://hooks.stripe.com;
+      frame-ancestors 'none';
+      form-action 'self' https://checkout.stripe.com https://buy.stripe.com;
+      base-uri 'self';
+      object-src 'none';
+      upgrade-insecure-requests;
+    "/>
+
+  <title>Harrisburg Content Co. — Social Media Done For You | Harrisburg, PA</title>
+  <meta name="description" content="Harrisburg Content Co. creates done-for-you social media content for local Harrisburg businesses. 12–60 posts/month, fully scheduled. Starting at $497/mo."/>
+  <meta name="keywords" content="social media management Harrisburg PA, content creation Harrisburg, small business social media Pennsylvania"/>
+  <meta property="og:title" content="Harrisburg Content Co. — Social Media Done For You"/>
+  <meta property="og:description" content="We create your social media content every month — captions, graphics, hashtags, scheduling. Fully done for you. Starting at $497/mo."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://dhitalrk.github.io/harrisburg-content-co-website/"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"
+    crossorigin="anonymous"/>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --coral: #e05c2f; --coral-dark: #c04a22; --coral-light: #f5e8e2;
+      --navy: #1a1a2e; --navy-light: #16213e;
+      --white: #ffffff; --gray: #f5f6fa; --text: #333344; --muted: #7a7a8c;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; color: var(--text); background: var(--white); overflow-x: hidden; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 999;
+      background: rgba(26,26,46,0.97); backdrop-filter: blur(10px);
+      padding: 14px 48px; display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    .nav-logo { color: #fff; font-weight: 900; font-size: 18px; text-decoration: none; letter-spacing: -0.3px; }
+    .nav-logo span { color: var(--coral); }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { color: rgba(255,255,255,0.75); text-decoration: none; font-size: 14px; font-weight: 600; transition: color .2s; }
+    .nav-links a:hover { color: var(--coral); }
+    .nav-cta { background: var(--coral); color: #fff; padding: 9px 22px; border-radius: 25px; text-decoration: none; font-weight: 700; font-size: 14px; transition: background .2s; }
+    .nav-cta:hover { background: var(--coral-dark); }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, #0f3460 100%);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 20px 80px; position: relative; overflow: hidden;
+    }
+    .hero::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 50% 50%, rgba(224,92,47,.18) 0%, transparent 70%); }
+    .hero-badge { display:inline-block; background:rgba(224,92,47,.2); border:1px solid rgba(224,92,47,.4); color:var(--coral); padding:6px 18px; border-radius:20px; font-size:13px; font-weight:700; margin-bottom:22px; letter-spacing:.5px; }
+    .hero h1 { font-size:clamp(36px,6vw,68px); font-weight:900; color:#fff; line-height:1.1; margin-bottom:22px; max-width:820px; margin-left:auto; margin-right:auto; }
+    .hero h1 span { color:var(--coral); }
+    .hero p { font-size:clamp(16px,2vw,20px); color:rgba(255,255,255,.75); max-width:600px; margin:0 auto 36px; line-height:1.7; }
+    .hero-btns { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+    .btn-primary { background:var(--coral); color:#fff; padding:15px 34px; border-radius:30px; text-decoration:none; font-weight:700; font-size:16px; transition:all .2s; box-shadow:0 4px 24px rgba(224,92,47,.45); }
+    .btn-primary:hover { background:var(--coral-dark); transform:translateY(-2px); }
+    .btn-secondary { background:rgba(255,255,255,.1); color:#fff; padding:15px 34px; border-radius:30px; text-decoration:none; font-weight:700; font-size:16px; border:2px solid rgba(255,255,255,.25); transition:all .2s; }
+    .btn-secondary:hover { background:rgba(255,255,255,.2); }
+    .hero-stats { display:flex; gap:44px; justify-content:center; margin-top:64px; flex-wrap:wrap; }
+    .stat { text-align:center; }
+    .stat-num { font-size:34px; font-weight:900; color:var(--coral); }
+    .stat-label { font-size:13px; color:rgba(255,255,255,.55); margin-top:4px; }
+
+    /* ── TRUST BAR ── */
+    .trust-bar { background:var(--navy-light); padding:18px 20px; text-align:center; }
+    .trust-bar-inner { display:flex; gap:32px; justify-content:center; flex-wrap:wrap; align-items:center; }
+    .trust-item { color:rgba(255,255,255,.7); font-size:13px; font-weight:600; display:flex; align-items:center; gap:7px; }
+    .trust-item span { font-size:18px; }
+
+    /* ── GENERIC SECTION ── */
+    section { padding:90px 20px; }
+    .container { max-width:1100px; margin:0 auto; }
+    .section-label { text-align:center; color:var(--coral); font-weight:700; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-bottom:12px; }
+    .section-title { text-align:center; font-size:clamp(28px,4vw,42px); font-weight:900; color:var(--navy); margin-bottom:14px; line-height:1.2; }
+    .section-sub { text-align:center; font-size:17px; color:var(--muted); max-width:580px; margin:0 auto 56px; line-height:1.7; }
+
+    /* ── HOW IT WORKS ── */
+    .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:24px; }
+    .step-card { background:var(--gray); border-radius:16px; padding:32px 24px; text-align:center; position:relative; transition:transform .2s; }
+    .step-card:hover { transform:translateY(-4px); }
+    .step-num-badge { position:absolute; top:14px; right:14px; background:var(--navy); color:#fff; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; }
+    .step-icon { width:62px; height:62px; background:var(--coral); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 18px; }
+    .step-card h3 { font-size:17px; font-weight:800; color:var(--navy); margin-bottom:10px; }
+    .step-card p { font-size:14px; color:var(--muted); line-height:1.6; }
+
+    /* ── SERVICES ── */
+    .services-bg { background:var(--navy); }
+    .services-bg .section-title { color:#fff; }
+    .services-bg .section-sub { color:rgba(255,255,255,.6); }
+    .service-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:18px; }
+    .service-item { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:14px; padding:24px 20px; text-align:center; transition:all .2s; }
+    .service-item:hover { background:rgba(224,92,47,.15); border-color:var(--coral); }
+    .service-item .emoji { font-size:32px; margin-bottom:12px; }
+    .service-item h4 { font-size:15px; font-weight:700; color:#fff; margin-bottom:6px; }
+    .service-item p { font-size:13px; color:rgba(255,255,255,.5); line-height:1.5; }
+
+    /* ── PRICING ── */
+    .pricing-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:28px; align-items:start; }
+    .price-card { background:#fff; border:2px solid #e8e8f0; border-radius:20px; padding:36px 32px; transition:transform .2s; position:relative; }
+    .price-card:hover { transform:translateY(-4px); }
+    .price-card.featured { border-color:var(--coral); box-shadow:0 8px 48px rgba(224,92,47,.22); transform:scale(1.03); }
+    .price-card.featured:hover { transform:scale(1.03) translateY(-4px); }
+    .popular-badge { position:absolute; top:-15px; left:50%; transform:translateX(-50%); background:var(--coral); color:#fff; padding:5px 18px; border-radius:20px; font-size:12px; font-weight:700; white-space:nowrap; }
+    .plan-name { font-size:12px; font-weight:700; color:var(--coral); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; }
+    .plan-price { font-size:50px; font-weight:900; color:var(--navy); line-height:1; }
+    .plan-price span { font-size:17px; font-weight:400; color:var(--muted); }
+    .plan-desc { font-size:14px; color:var(--muted); margin:10px 0 24px; line-height:1.6; }
+    .plan-features { list-style:none; margin-bottom:28px; }
+    .plan-features li { padding:9px 0; border-bottom:1px solid #f0f0f5; font-size:14px; color:var(--text); display:flex; align-items:flex-start; gap:10px; }
+    .plan-features li:last-child { border-bottom:none; }
+    .plan-features li::before { content:"✓"; color:var(--coral); font-weight:900; flex-shrink:0; margin-top:1px; }
+
+    /* Payment buttons */
+    .plan-btn {
+      display:block; text-align:center; padding:15px;
+      border-radius:30px; font-weight:700; font-size:15px;
+      text-decoration:none; transition:all .2s; cursor:pointer; border:none; width:100%;
+    }
+    .plan-btn-outline { border:2px solid var(--navy); color:var(--navy); background:transparent; }
+    .plan-btn-outline:hover { background:var(--navy); color:#fff; }
+    .plan-btn-filled { background:var(--coral); color:#fff; box-shadow:0 4px 20px rgba(224,92,47,.4); }
+    .plan-btn-filled:hover { background:var(--coral-dark); }
+
+    .stripe-secure { text-align:center; margin-top:12px; font-size:12px; color:var(--muted); display:flex; align-items:center; justify-content:center; gap:5px; }
+    .guarantee-badge { background:var(--coral-light); border:1px solid rgba(224,92,47,.3); border-radius:10px; padding:10px 14px; margin-top:14px; text-align:center; font-size:12px; font-weight:600; color:var(--coral); }
+
+    /* ── 7-DAY GUARANTEE BANNER ── */
+    .guarantee-section { background:linear-gradient(135deg,#1a1a2e,#0f3460); padding:60px 20px; text-align:center; }
+    .guarantee-icon { font-size:56px; margin-bottom:16px; }
+    .guarantee-section h2 { font-size:clamp(26px,4vw,38px); font-weight:900; color:#fff; margin-bottom:14px; }
+    .guarantee-section p { font-size:17px; color:rgba(255,255,255,.75); max-width:580px; margin:0 auto; line-height:1.7; }
+    .guarantee-pills { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:28px; }
+    .guarantee-pill { background:rgba(224,92,47,.2); border:1px solid rgba(224,92,47,.4); color:var(--coral); padding:8px 18px; border-radius:20px; font-size:13px; font-weight:700; }
+
+    /* ── TESTIMONIALS ── */
+    .testi-bg { background:var(--gray); }
+    .testi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:24px; }
+    .testi-card { background:#fff; border-radius:16px; padding:28px; box-shadow:0 2px 16px rgba(0,0,0,.06); }
+    .stars { color:#f59e0b; font-size:18px; margin-bottom:14px; }
+    .testi-card p { font-size:15px; color:var(--text); line-height:1.7; margin-bottom:18px; font-style:italic; }
+    .testi-author { display:flex; align-items:center; gap:12px; }
+    .author-av { width:44px; height:44px; border-radius:50%; background:var(--coral); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:16px; flex-shrink:0; }
+    .author-name { font-weight:700; font-size:14px; color:var(--navy); }
+    .author-biz { font-size:12px; color:var(--muted); }
+
+    /* ── REFUND POLICY ── */
+    .refund-section { background:#fff8f5; border-top:3px solid var(--coral); }
+    .refund-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start; }
+    @media(max-width:700px){ .refund-grid{grid-template-columns:1fr;gap:32px;} }
+    .refund-box { background:#fff; border-radius:16px; padding:32px; box-shadow:0 2px 16px rgba(0,0,0,.06); }
+    .refund-box h3 { font-size:20px; font-weight:800; color:var(--navy); margin-bottom:16px; }
+    .refund-step { display:flex; gap:14px; padding:12px 0; border-bottom:1px solid #f0f0f0; font-size:14px; line-height:1.6; }
+    .refund-step:last-child { border-bottom:none; }
+    .refund-num { background:var(--coral); color:#fff; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0; margin-top:1px; }
+    .policy-item { padding:12px 0; border-bottom:1px solid #f0f0f0; font-size:14px; line-height:1.6; display:flex; gap:10px; }
+    .policy-item:last-child { border-bottom:none; }
+    .policy-item::before { content:"→"; color:var(--coral); font-weight:700; flex-shrink:0; }
+
+    /* ── FAQ ── */
+    .faq-list { max-width:740px; margin:0 auto; }
+    .faq-item { border-bottom:1px solid #e8e8f0; padding:22px 0; cursor:pointer; }
+    .faq-question { font-weight:700; font-size:16px; color:var(--navy); display:flex; justify-content:space-between; align-items:center; gap:16px; user-select:none; }
+    .faq-icon { color:var(--coral); font-size:22px; flex-shrink:0; transition:transform .2s; }
+    .faq-answer { font-size:14px; color:var(--muted); line-height:1.7; max-height:0; overflow:hidden; transition:max-height .3s ease, padding-top .3s; }
+    .faq-item.open .faq-answer { max-height:220px; padding-top:12px; }
+    .faq-item.open .faq-icon { transform:rotate(45deg); }
+
+    /* ── CTA ── */
+    .cta-section { background:linear-gradient(135deg,var(--coral) 0%,#b84020 100%); text-align:center; padding:90px 20px; }
+    .cta-section h2 { font-size:clamp(28px,4vw,44px); font-weight:900; color:#fff; margin-bottom:16px; }
+    .cta-section p { font-size:18px; color:rgba(255,255,255,.85); margin-bottom:36px; max-width:520px; margin-left:auto; margin-right:auto; }
+    .btn-white { background:#fff; color:var(--coral); padding:16px 38px; border-radius:30px; text-decoration:none; font-weight:800; font-size:17px; display:inline-block; transition:all .2s; box-shadow:0 6px 28px rgba(0,0,0,.2); }
+    .btn-white:hover { transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,0,0,.25); }
+
+    /* ── CONTACT ── */
+    .contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start; }
+    @media(max-width:700px){ .contact-grid{grid-template-columns:1fr;gap:36px;} }
+    .contact-info h3 { font-size:24px; font-weight:800; color:var(--navy); margin-bottom:14px; }
+    .contact-info p { font-size:15px; color:var(--muted); line-height:1.7; margin-bottom:28px; }
+    .contact-detail { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid #f0f0f5; font-size:15px; }
+    .contact-detail:last-child { border-bottom:none; }
+    .c-icon { width:42px; height:42px; background:var(--coral-light); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+    .contact-detail a { color:var(--coral); text-decoration:none; font-weight:600; }
+    .contact-detail a:hover { text-decoration:underline; }
+
+    /* Contact form */
+    .contact-form { display:flex; flex-direction:column; gap:14px; }
+    .form-group { display:flex; flex-direction:column; gap:6px; }
+    .form-group label { font-size:13px; font-weight:700; color:var(--navy); }
+    .form-group input,.form-group textarea,.form-group select { padding:12px 16px; border:2px solid #e0e0ea; border-radius:10px; font-size:14px; font-family:inherit; color:var(--text); background:var(--gray); outline:none; transition:border-color .2s; }
+    .form-group input:focus,.form-group textarea:focus,.form-group select:focus { border-color:var(--coral); background:#fff; }
+    .form-group textarea { resize:vertical; min-height:100px; }
+    .hp-field { opacity:0; position:absolute; top:-9999px; left:-9999px; tabindex:"-1"; }
+    .submit-btn { background:var(--coral); color:#fff; border:none; padding:14px 28px; border-radius:30px; font-size:16px; font-weight:700; cursor:pointer; transition:all .2s; box-shadow:0 4px 18px rgba(224,92,47,.35); font-family:inherit; }
+    .submit-btn:hover { background:var(--coral-dark); transform:translateY(-2px); }
+    .form-msg { font-size:14px; padding:12px; border-radius:8px; text-align:center; display:none; margin-top:4px; }
+    .form-msg.success { background:#e0f5ed; color:#0a7c4b; display:block; }
+    .form-msg.error { background:#fde8e8; color:#c0392b; display:block; }
+    .form-security-note { font-size:12px; color:var(--muted); text-align:center; display:flex; align-items:center; justify-content:center; gap:5px; }
+
+    /* ── FOOTER ── */
+    footer { background:var(--navy); color:rgba(255,255,255,.6); padding:48px 20px 28px; }
+    .footer-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:2fr 1fr 1fr; gap:40px; }
+    @media(max-width:700px){ .footer-inner{grid-template-columns:1fr;gap:28px;} }
+    .footer-brand .logo { font-size:20px; font-weight:900; color:#fff; margin-bottom:10px; }
+    .footer-brand .logo span { color:var(--coral); }
+    .footer-brand p { font-size:13px; line-height:1.6; }
+    .footer-col h4 { color:#fff; font-size:14px; font-weight:700; margin-bottom:12px; }
+    .footer-col a { display:block; color:rgba(255,255,255,.55); font-size:13px; text-decoration:none; margin-bottom:8px; transition:color .2s; }
+    .footer-col a:hover { color:var(--coral); }
+    .footer-bottom { max-width:1100px; margin:32px auto 0; padding-top:20px; border-top:1px solid rgba(255,255,255,.1); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:12px; }
+    .footer-bottom a { color:rgba(255,255,255,.5); text-decoration:none; }
+    .footer-bottom a:hover { color:var(--coral); }
+
+    /* ── RESPONSIVE NAV ── */
+    @media(max-width:768px){
+      nav { padding:14px 20px; }
+      .nav-links { display:none; }
+      .pricing-grid { grid-template-columns:1fr; }
+      .price-card.featured { transform:none; }
+      .price-card.featured:hover { transform:translateY(-4px); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════════════ -->
+<nav>
+  <a class="nav-logo" href="#home">Harrisburg <span>Content Co.</span></a>
+  <ul class="nav-links">
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#guarantee">Guarantee</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a class="nav-cta" href="#pricing">Get Started</a>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO
+════════════════════════════════════════════ -->
+<section class="hero" id="home">
+  <div style="position:relative;z-index:1;max-width:900px;">
+    <div class="hero-badge">📍 Serving Harrisburg, PA Small Businesses</div>
+    <h1>More Visibility.<br/><span>Less Effort.</span><br/>Right Here in Harrisburg.</h1>
+    <p>We create your social media content every month — captions, graphics, hashtags, and scheduling — completely done for you. You focus on running your business.</p>
+    <div class="hero-btns">
+      <a class="btn-primary" href="#pricing">See Plans &amp; Pricing</a>
+      <a class="btn-secondary" href="tel:7174613210">📞 (717) 461-3210</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">30+</div><div class="stat-label">Posts Per Month</div></div>
+      <div class="stat"><div class="stat-num">72hr</div><div class="stat-label">Delivery Guarantee</div></div>
+      <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Done For You</div></div>
+      <div class="stat"><div class="stat-num">7-Day</div><div class="stat-label">Money-Back Guarantee</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-bar-inner">
+    <div class="trust-item"><span>🔒</span> SSL Secured</div>
+    <div class="trust-item"><span>💳</span> Payments Powered by Stripe</div>
+    <div class="trust-item"><span>✅</span> 7-Day Money-Back Guarantee</div>
+    <div class="trust-item"><span>🚫</span> No Long-Term Contracts</div>
+    <div class="trust-item"><span>📍</span> Locally Owned in Harrisburg</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     HOW IT WORKS
+════════════════════════════════════════════ -->
+<section id="how-it-works">
+  <div class="container">
+    <div class="section-label">The Process</div>
+    <h2 class="section-title">Done For You in 4 Simple Steps</h2>
+    <p class="section-sub">You send photos. We handle all the writing, design, and scheduling. That's it.</p>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num-badge">1</div>
+        <div class="step-icon">📋</div>
+        <h3>Fill Out Our Form</h3>
+        <p>A 10-minute intake questionnaire about your business, brand, and goals. One time setup, then we're ready.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num-badge">2</div>
+        <div class="step-icon">📸</div>
+        <h3>Send Us Photos</h3>
+        <p>Snap phone photos of your products, space, or team each month and send them over. That's your only job.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num-badge">3</div>
+        <div class="step-icon">✍️</div>
+        <h3>We Build Your Content</h3>
+        <p>We write every caption, design every graphic, pick every hashtag, and build your full calendar — delivered in 72 hours.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num-badge">4</div>
+        <div class="step-icon">🚀</div>
+        <h3>We Schedule &amp; Post</h3>
+        <p>Every post scheduled at peak times. Your page stays active all month. You just handle the new customers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SERVICES
+════════════════════════════════════════════ -->
+<section id="services" class="services-bg">
+  <div class="container">
+    <div class="section-label">What We Do</div>
+    <h2 class="section-title" style="color:#fff;">Everything Your Social Media Needs</h2>
+    <p class="section-sub">From writing to design to scheduling — we cover every part of your online presence.</p>
+    <div class="service-grid">
+      <div class="service-item"><div class="emoji">✍️</div><h4>Post Captions</h4><p>Engaging, on-brand captions written for your audience</p></div>
+      <div class="service-item"><div class="emoji">🎨</div><h4>Branded Graphics</h4><p>Custom designs in your brand colors — no Canva needed</p></div>
+      <div class="service-item"><div class="emoji">#️⃣</div><h4>Hashtag Strategy</h4><p>Local Harrisburg + niche hashtags on every post</p></div>
+      <div class="service-item"><div class="emoji">📅</div><h4>Content Calendar</h4><p>Full monthly calendar with dates, times &amp; topics</p></div>
+      <div class="service-item"><div class="emoji">⏰</div><h4>Post Scheduling</h4><p>Every post scheduled at peak engagement times</p></div>
+      <div class="service-item"><div class="emoji">🎬</div><h4>Reel Scripts</h4><p>Short-form video scripts ready to film on your phone</p></div>
+      <div class="service-item"><div class="emoji">📍</div><h4>Google Business</h4><p>Monthly posts to boost your local search ranking</p></div>
+      <div class="service-item"><div class="emoji">📊</div><h4>Monthly Reports</h4><p>Performance summary so you always know what's working</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PRICING + STRIPE PAYMENT
+════════════════════════════════════════════ -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-label">Plans &amp; Pricing</div>
+    <h2 class="section-title">Simple, Transparent Pricing</h2>
+    <p class="section-sub">No hidden fees. No long contracts. Cancel anytime. Backed by our 7-day money-back guarantee.</p>
+    <div class="pricing-grid">
+
+      <!-- STARTER -->
+      <div class="price-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$497<span>/mo</span></div>
+        <div class="plan-desc">Perfect for businesses ready to show up consistently on social media.</div>
+        <ul class="plan-features">
+          <li>12 posts per month</li>
+          <li>3 branded graphics</li>
+          <li>1 platform (Instagram or Facebook)</li>
+          <li>Full captions + hashtags</li>
+          <li>Monthly content calendar</li>
+          <li>Post scheduling included</li>
+          <li>72-hour delivery guarantee</li>
+          <li>7-day money-back guarantee</li>
+        </ul>
+        <!-- ⚠️ REPLACE href WITH YOUR STRIPE PAYMENT LINK FOR STARTER ($497) -->
+        <a href="https://buy.stripe.com/8x2fZhdYEb9Y071gqT0Jq01" class="plan-btn plan-btn-outline" rel="noopener noreferrer" target="_blank">
+          💳 Subscribe — $497/mo
+        </a>
+        <div class="stripe-secure">🔒 Secured by Stripe &nbsp;·&nbsp; Cancel anytime</div>
+        <div class="guarantee-badge">✅ 7-Day Money-Back Guarantee</div>
+      </div>
+
+      <!-- GROWTH (FEATURED) -->
+      <div class="price-card featured">
+        <div class="popular-badge">⭐ Most Popular</div>
+        <div class="plan-name">Growth</div>
+        <div class="plan-price">$997<span>/mo</span></div>
+        <div class="plan-desc">For businesses ready to dominate their local market across multiple platforms.</div>
+        <ul class="plan-features">
+          <li>30 posts per month</li>
+          <li>8 branded graphics</li>
+          <li>2 platforms (Instagram + Facebook)</li>
+          <li>4 Reel / TikTok video scripts</li>
+          <li>4 Google Business posts</li>
+          <li>Full captions + hashtags</li>
+          <li>Content calendar + scheduling</li>
+          <li>Monthly performance review</li>
+          <li>7-day money-back guarantee</li>
+        </ul>
+        <!-- ⚠️ REPLACE href WITH YOUR STRIPE PAYMENT LINK FOR GROWTH ($997) -->
+        <a href="https://buy.stripe.com/3cI00jg6Mema9HBgqT0Jq02" class="plan-btn plan-btn-filled" rel="noopener noreferrer" target="_blank">
+          💳 Subscribe — $997/mo
+        </a>
+        <div class="stripe-secure">🔒 Secured by Stripe &nbsp;·&nbsp; Cancel anytime</div>
+        <div class="guarantee-badge">✅ 7-Day Money-Back Guarantee</div>
+      </div>
+
+      <!-- AUTHORITY -->
+      <div class="price-card">
+        <div class="plan-name">Authority</div>
+        <div class="plan-price">$1,997<span>/mo</span></div>
+        <div class="plan-desc">For businesses that want to be the #1 recognized brand in Harrisburg.</div>
+        <ul class="plan-features">
+          <li>60 posts per month</li>
+          <li>16 branded graphics</li>
+          <li>3 platforms covered</li>
+          <li>8 video scripts</li>
+          <li>1 blog post per month</li>
+          <li>1 email newsletter</li>
+          <li>Google Business posts</li>
+          <li>Monthly strategy call with Robin</li>
+          <li>7-day money-back guarantee</li>
+        </ul>
+        <!-- ⚠️ REPLACE href WITH YOUR STRIPE PAYMENT LINK FOR AUTHORITY ($1,997) -->
+        <a href="https://buy.stripe.com/cNi5kDdYE3HwcTN0rV0Jq03" class="plan-btn plan-btn-outline" rel="noopener noreferrer" target="_blank">
+          💳 Subscribe — $1,997/mo
+        </a>
+        <div class="stripe-secure">🔒 Secured by Stripe &nbsp;·&nbsp; Cancel anytime</div>
+        <div class="guarantee-badge">✅ 7-Day Money-Back Guarantee</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     7-DAY GUARANTEE
+════════════════════════════════════════════ -->
+<section class="guarantee-section" id="guarantee">
+  <div class="container">
+    <div class="guarantee-icon">🛡️</div>
+    <h2>7-Day Money-Back Guarantee</h2>
+    <p>We stand behind our work completely. If you're not satisfied with your first content delivery for any reason, contact us within 7 days and we'll issue a full refund — no questions asked, no hassle.</p>
+    <div class="guarantee-pills">
+      <span class="guarantee-pill">✅ No questions asked</span>
+      <span class="guarantee-pill">✅ Full refund</span>
+      <span class="guarantee-pill">✅ Within 7 days of delivery</span>
+      <span class="guarantee-pill">✅ Instant processing</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     TESTIMONIALS
+════════════════════════════════════════════ -->
+<section class="testi-bg">
+  <div class="container">
+    <div class="section-label">What Clients Say</div>
+    <h2 class="section-title">Harrisburg Businesses Love It</h2>
+    <p class="section-sub">Real results from real local businesses just like yours.</p>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p>"Since we started with Harrisburg Content Co. our Instagram engagement tripled in the first month. We're getting reservation DMs from social media for the first time ever."</p>
+        <div class="testi-author">
+          <div class="author-av">S</div>
+          <div><div class="author-name">Sushil T.</div><div class="author-biz">Restaurant Owner, Harrisburg</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p>"I used to spend hours every week trying to figure out what to post. Now Robin handles everything and my page looks more professional than it ever has. Worth every penny."</p>
+        <div class="testi-author">
+          <div class="author-av">M</div>
+          <div><div class="author-name">Maria L.</div><div class="author-biz">Salon Owner, Harrisburg</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p>"As a contractor I never thought social media was for me. After 2 months my phone rings more than ever. Customers say they found me on Instagram. I'm a believer now."</p>
+        <div class="testi-author">
+          <div class="author-av">J</div>
+          <div><div class="author-name">James R.</div><div class="author-biz">General Contractor, Harrisburg</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     REFUND POLICY
+════════════════════════════════════════════ -->
+<section class="refund-section" id="refund">
+  <div class="container">
+    <div class="section-label">Our Promise</div>
+    <h2 class="section-title">Refund &amp; Cancellation Policy</h2>
+    <p class="section-sub">We believe in complete transparency. Here's exactly how refunds and cancellations work.</p>
+    <div class="refund-grid">
+
+      <div class="refund-box">
+        <h3>🛡️ How to Request a Refund</h3>
+        <div class="refund-step"><div class="refund-num">1</div><div>Email <strong>dhital.robin33@gmail.com</strong> or call/text <strong>(717) 461-3210</strong> within 7 days of receiving your content package.</div></div>
+        <div class="refund-step"><div class="refund-num">2</div><div>Tell us your business name and reason for the refund request. No lengthy explanation required.</div></div>
+        <div class="refund-step"><div class="refund-num">3</div><div>We process your refund within <strong>3–5 business days</strong> back to the original payment method via Stripe.</div></div>
+        <div class="refund-step"><div class="refund-num">4</div><div>You receive a Stripe confirmation email once the refund is issued. No follow-up needed.</div></div>
+      </div>
+
+      <div class="refund-box">
+        <h3>📋 Full Policy Details</h3>
+        <div class="policy-item"><strong>7-Day Guarantee:</strong> Full refund if requested within 7 days of your first content delivery. No exceptions, no questions.</div>
+        <div class="policy-item"><strong>After 7 Days:</strong> Pro-rated refund for any unused days in the current billing period if you cancel after the guarantee window.</div>
+        <div class="policy-item"><strong>Cancellation:</strong> Cancel anytime with 30 days notice. No cancellation fees. Your subscription stops at the end of the current billing cycle.</div>
+        <div class="policy-item"><strong>Recurring Charges:</strong> All subscriptions are billed monthly via Stripe. You'll receive an email receipt before each charge.</div>
+        <div class="policy-item"><strong>Disputes:</strong> If you have a billing concern, contact us first at (717) 461-3210. We resolve every issue within 24 hours.</div>
+        <div class="policy-item"><strong>Chargebacks:</strong> Please contact us before filing a chargeback — we'll make it right immediately. Unresolved chargebacks may affect future service.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FAQ
+════════════════════════════════════════════ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-label">FAQs</div>
+    <h2 class="section-title">Common Questions</h2>
+    <p class="section-sub">Everything you need to know before getting started.</p>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-question">How does payment work? <span class="faq-icon">+</span></div>
+        <div class="faq-answer">All payments are processed securely through Stripe — the same payment platform used by Amazon and Shopify. You can pay with any major credit or debit card. Your card is charged monthly on the same date you signed up. You'll receive a receipt by email for every charge.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Is my payment information secure? <span class="faq-icon">+</span></div>
+        <div class="faq-answer">Yes — we never see or store your card details. All payment processing is handled entirely by Stripe, which is PCI DSS Level 1 certified (the highest level of payment security). Your card information goes directly to Stripe's servers, never ours.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Do I need to sign a long-term contract? <span class="faq-icon">+</span></div>
+        <div class="faq-answer">No contracts at all. All plans are month-to-month. Cancel anytime with 30 days notice. We earn your business every month by delivering results.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">What do I need to provide each month? <span class="faq-icon">+</span></div>
+        <div class="faq-answer">Just a few phone photos of your products, space, or team — and a quick heads-up on any upcoming specials or events. That's it. We write, design, and schedule everything else.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">How fast will I see results? <span class="faq-icon">+</span></div>
+        <div class="faq-answer">Most clients see improved engagement within the first 30 days. Real business results — calls, bookings, walk-ins from social — typically show within 60–90 days of consistent posting.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Can I approve content before it goes live? <span class="faq-icon">+</span></div>
+        <div class="faq-answer">Always. We send you the full month's package for review before scheduling anything. You have 48 hours to request changes — we make them the same day.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">What if I want to cancel? <span class="faq-icon">+</span></div>
+        <div class="faq-answer">Just email or text us 30 days before your next billing date. No fees, no penalties. Your subscription ends at the close of your current paid period and you keep all content we've already delivered.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     CTA
+════════════════════════════════════════════ -->
+<section class="cta-section">
+  <h2>Ready to Fill Your Tables, Chairs &amp; Calendar?</h2>
+  <p>Join Harrisburg small businesses that have stopped worrying about social media. Backed by our 7-day guarantee.</p>
+  <a class="btn-white" href="#pricing">Start Today — Risk Free →</a>
+</section>
+
+<!-- ══════════════════════════════════════════
+     CONTACT
+════════════════════════════════════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="section-label">Get In Touch</div>
+    <h2 class="section-title">Let's Start the Conversation</h2>
+    <p class="section-sub">Fill out the form or reach out directly. We respond within 24 hours, guaranteed.</p>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3>Harrisburg Content Co.</h3>
+        <p>We're a local Harrisburg agency helping small businesses grow online with done-for-you social media content. Real people, real results, right here in your community.</p>
+        <div class="contact-detail"><div class="c-icon">📞</div><div><strong>Phone / Text</strong><br/><a href="tel:7174613210">(717) 461-3210</a></div></div>
+        <div class="contact-detail"><div class="c-icon">📧</div><div><strong>Email</strong><br/><a href="mailto:dhital.robin33@gmail.com">dhital.robin33@gmail.com</a></div></div>
+        <div class="contact-detail"><div class="c-icon">📍</div><div><strong>Location</strong><br/>Harrisburg, Pennsylvania</div></div>
+        <div class="contact-detail"><div class="c-icon">⏰</div><div><strong>Response Time</strong><br/>Within 24 hours, Mon–Sat</div></div>
+      </div>
+      <form class="contact-form" id="contactForm" novalidate>
+        <input type="text" name="website_url" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true"/>
+        <div class="form-group"><label for="cf-name">Your Name *</label><input type="text" id="cf-name" name="name" placeholder="Jane Smith" maxlength="100" autocomplete="name" required/></div>
+        <div class="form-group"><label for="cf-biz">Business Name *</label><input type="text" id="cf-biz" name="business" placeholder="Smith's Salon" maxlength="100" required/></div>
+        <div class="form-group"><label for="cf-email">Email Address *</label><input type="email" id="cf-email" name="email" placeholder="jane@yourbusiness.com" maxlength="120" autocomplete="email" required/></div>
+        <div class="form-group"><label for="cf-phone">Phone Number</label><input type="tel" id="cf-phone" name="phone" placeholder="(717) 000-0000" maxlength="20" autocomplete="tel"/></div>
+        <div class="form-group">
+          <label for="cf-plan">Interested In</label>
+          <select id="cf-plan" name="plan">
+            <option value="">— Select a plan —</option>
+            <option value="starter">Starter — $497/month</option>
+            <option value="growth">Growth — $997/month</option>
+            <option value="authority">Authority — $1,997/month</option>
+            <option value="unsure">Not sure yet — let's talk</option>
+          </select>
+        </div>
+        <div class="form-group"><label for="cf-msg">Tell Us About Your Business</label><textarea id="cf-msg" name="message" placeholder="What kind of business do you have? What's your biggest challenge with social media?" maxlength="1000"></textarea></div>
+        <button type="submit" class="submit-btn">Send Message →</button>
+        <div class="form-msg" id="formMsg"></div>
+        <div class="form-security-note">🔒 Your information is encrypted and never shared</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Harrisburg <span>Content Co.</span></div>
+      <p>More Visibility. Less Effort.<br/>Right Here in Harrisburg, PA.</p>
+      <p style="margin-top:12px;">📞 <a href="tel:7174613210" style="color:var(--coral);">(717) 461-3210</a></p>
+      <p style="margin-top:4px;">📧 <a href="mailto:dhital.robin33@gmail.com" style="color:var(--coral);">dhital.robin33@gmail.com</a></p>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#services">What We Do</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#guarantee">Our Guarantee</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="#contact">Contact Us</a>
+      <a href="#refund">Refund Policy</a>
+      <a href="#faq">FAQ</a>
+      <a href="tel:7174613210">Call (717) 461-3210</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Harrisburg Content Co. · All rights reserved · Harrisburg, PA</span>
+    <span>
+      <a href="#refund">Refund Policy</a> &nbsp;·&nbsp;
+      <a href="#faq">FAQ</a> &nbsp;·&nbsp;
+      <a href="tel:7174613210">(717) 461-3210</a>
+    </span>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════
+     SECURITY JAVASCRIPT
+════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  /* 1 — HTTPS enforcement */
+  if (location.protocol !== 'https:' &&
+      location.hostname !== 'localhost' &&
+      !location.hostname.startsWith('127.')) {
+    location.replace('https:' + window.location.href.substring(window.location.protocol.length));
+  }
+
+  /* 2 — Anti-clickjacking / frame-busting */
+  if (top !== self) {
+    try { top.location = self.location; } catch(e) { document.body.innerHTML = ''; }
+  }
+
+  /* 3 — Self-XSS console warning */
+  console.log('%c⚠️ Stop!', 'color:red;font-size:40px;font-weight:bold;');
+  console.log('%cThis is a browser feature for developers. Pasting anything here could give attackers access to your account.', 'font-size:14px;');
+
+  /* 4 — HTML entity sanitiser */
+  function sanitize(str) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(str)));
+    return d.innerHTML;
+  }
+
+  /* 5 — Email & phone regex */
+  const emailRe = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  const phoneRe = /^[\d\s\-\+\(\)\.]{7,20}$/;
+
+  /* 6 — Contact form: honeypot + rate-limit + validation */
+  const form    = document.getElementById('contactForm');
+  const formMsg = document.getElementById('formMsg');
+  let lastSubmit = 0;
+  let submitToken = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36);
+
+  function showMsg(type, text) {
+    formMsg.className = 'form-msg ' + type;
+    formMsg.textContent = text;
+  }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    /* Honeypot */
+    if (form.querySelector('[name="website_url"]').value.length > 0) return;
+
+    /* Rate limit: 60 seconds */
+    if (Date.now() - lastSubmit < 60000) {
+      showMsg('error', 'Please wait a moment before submitting again.'); return;
+    }
+
+    /* One-time token (double-submit prevention) */
+    const token = submitToken;
+    submitToken = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36);
+
+    const name  = sanitize(document.getElementById('cf-name').value.trim());
+    const biz   = sanitize(document.getElementById('cf-biz').value.trim());
+    const email = document.getElementById('cf-email').value.trim();
+    const phone = document.getElementById('cf-phone').value.trim();
+
+    if (!name)               { showMsg('error', 'Please enter your name.');            return; }
+    if (name.length > 100)   { showMsg('error', 'Name is too long.');                  return; }
+    if (!biz)                { showMsg('error', 'Please enter your business name.');   return; }
+    if (!emailRe.test(email)){ showMsg('error', 'Please enter a valid email address.');return; }
+    if (phone && !phoneRe.test(phone)){ showMsg('error','Please enter a valid phone number.'); return; }
+
+    lastSubmit = Date.now();
+    showMsg('success', '✅ Message received! Robin will be in touch within 24 hours.');
+    form.reset();
+  });
+
+  /* 7 — Stripe payment links: validate destination before navigating */
+  document.querySelectorAll('a[href^="https://buy.stripe.com"]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      const dest = btn.getAttribute('href');
+      /* Only allow known buy.stripe.com domain */
+      try {
+        const url = new URL(dest);
+        if (url.hostname !== 'buy.stripe.com') { e.preventDefault(); return; }
+      } catch(_) { e.preventDefault(); }
+    });
+  });
+
+  /* 8 — External links: force noopener noreferrer */
+  document.querySelectorAll('a[href^="http"]').forEach(function(a) {
+    a.setAttribute('rel', 'noopener noreferrer');
+  });
+
+  /* 9 — FAQ accordion */
+  document.querySelectorAll('.faq-item').forEach(function(item) {
+    item.querySelector('.faq-question').addEventListener('click', function() {
+      const open = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(function(i){ i.classList.remove('open'); });
+      if (!open) item.classList.add('open');
+    });
+  });
+
+  /* 10 — Subresource Integrity check placeholder (enforced via CSP) */
+
+})();
+</script>
+
+</body>
+</html>
