@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="X-Frame-Options" content="DENY"/>
+  <meta name="referrer" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; frame-ancestors 'none'; form-action 'self' mailto:;"/>
+  <title>Request a Refund — Harrisburg Content Co.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" crossorigin="anonymous"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{--coral:#e05c2f;--coral-dark:#c04a22;--coral-light:#fff3ef;--navy:#1a1a2e;--gray:#f5f6fa;--muted:#7a7a8c;--white:#fff;}
+    body{font-family:'Inter',sans-serif;background:var(--gray);color:var(--navy);min-height:100vh;}
+
+    /* NAV */
+    nav{background:var(--navy);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;}
+    .nav-logo{color:#fff;font-weight:900;font-size:17px;text-decoration:none;}
+    .nav-logo span{color:var(--coral);}
+    .nav-back{color:rgba(255,255,255,.7);text-decoration:none;font-size:14px;font-weight:600;transition:color .2s;}
+    .nav-back:hover{color:var(--coral);}
+
+    /* HERO */
+    .hero{background:linear-gradient(135deg,var(--navy),#0f3460);padding:60px 20px 40px;text-align:center;}
+    .hero-icon{font-size:52px;margin-bottom:14px;}
+    .hero h1{font-size:clamp(26px,4vw,38px);font-weight:900;color:#fff;margin-bottom:10px;}
+    .hero p{font-size:16px;color:rgba(255,255,255,.7);max-width:500px;margin:0 auto;}
+
+    /* GUARANTEE STRIP */
+    .strip{background:var(--coral);padding:14px 20px;text-align:center;}
+    .strip-inner{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;align-items:center;}
+    .strip-item{color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;}
+
+    /* LAYOUT */
+    .page{max-width:900px;margin:0 auto;padding:48px 20px;}
+    .grid{display:grid;grid-template-columns:1fr 1.5fr;gap:32px;align-items:start;}
+    @media(max-width:700px){.grid{grid-template-columns:1fr;}}
+
+    /* INFO PANEL */
+    .info-panel{display:flex;flex-direction:column;gap:16px;}
+    .info-card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+    .info-card h3{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+    .info-step{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f5;font-size:13px;line-height:1.6;color:#444;}
+    .info-step:last-child{border-bottom:none;}
+    .step-dot{width:22px;height:22px;background:var(--coral);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px;}
+    .contact-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f0f5;font-size:13px;}
+    .contact-row:last-child{border-bottom:none;}
+    .contact-row a{color:var(--coral);text-decoration:none;font-weight:600;}
+    .c-ic{font-size:18px;flex-shrink:0;}
+
+    /* FORM CARD */
+    .form-card{background:#fff;border-radius:14px;padding:32px;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+    .form-card h2{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:6px;}
+    .form-card .sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+    .form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}
+    .form-group label{font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;}
+    .form-group input,.form-group select,.form-group textarea{
+      padding:11px 14px;border:2px solid #e0e0ea;border-radius:10px;
+      font-size:14px;font-family:inherit;color:var(--navy);background:var(--gray);
+      outline:none;transition:border-color .2s;
+    }
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--coral);background:#fff;}
+    .form-group textarea{resize:vertical;min-height:90px;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media(max-width:500px){.form-row{grid-template-columns:1fr;}}
+    .hp{opacity:0;position:absolute;top:-9999px;left:-9999px;}
+
+    /* Submit */
+    .submit-area{margin-top:8px;}
+    .submit-btn{width:100%;background:var(--coral);color:#fff;border:none;padding:14px;border-radius:30px;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;box-shadow:0 4px 16px rgba(224,92,47,.35);}
+    .submit-btn:hover{background:var(--coral-dark);transform:translateY(-1px);}
+    .submit-btn:disabled{background:#ccc;cursor:not-allowed;transform:none;box-shadow:none;}
+    .form-note{font-size:12px;color:var(--muted);text-align:center;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:5px;}
+
+    /* Success / Error */
+    .result-box{display:none;border-radius:12px;padding:20px 24px;margin-top:16px;font-size:14px;line-height:1.7;}
+    .result-box.success{background:#e0f5ed;border:1px solid #a8dfc5;color:#0a7c4b;display:block;}
+    .result-box.error{background:#fde8e8;border:1px solid #f5a5a5;color:#c0392b;display:block;}
+
+    /* FOOTER */
+    footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:28px 20px;font-size:13px;}
+    footer a{color:var(--coral);text-decoration:none;}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">Harrisburg <span>Content Co.</span></a>
+  <a class="nav-back" href="index.html">← Back to Website</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-icon">🛡️</div>
+  <h1>Request a Refund</h1>
+  <p>We stand behind our work. If you're not satisfied, we'll make it right — fast.</p>
+</div>
+
+<div class="strip">
+  <div class="strip-inner">
+    <div class="strip-item"><span>✅</span> 7-Day Money-Back Guarantee</div>
+    <div class="strip-item"><span>⚡</span> Processed in 3–5 Business Days</div>
+    <div class="strip-item"><span>💬</span> No Questions Asked</div>
+    <div class="strip-item"><span>🔒</span> Secure via Stripe</div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="grid">
+
+    <!-- LEFT: INFO -->
+    <div class="info-panel">
+
+      <div class="info-card">
+        <h3>⚡ How It Works</h3>
+        <div class="info-step"><div class="step-dot">1</div><div>Fill out the form with your details and reason.</div></div>
+        <div class="info-step"><div class="step-dot">2</div><div>Robin receives your request instantly by email.</div></div>
+        <div class="info-step"><div class="step-dot">3</div><div>Refund is processed in Stripe within 24 hours of your request.</div></div>
+        <div class="info-step"><div class="step-dot">4</div><div>Stripe sends your money back in 3–5 business days. You'll get a Stripe email confirmation.</div></div>
+      </div>
+
+      <div class="info-card">
+        <h3>📋 Refund Policy Summary</h3>
+        <div class="info-step"><div class="step-dot">✓</div><div><strong>7-Day Guarantee:</strong> Full refund within 7 days of first delivery, no questions.</div></div>
+        <div class="info-step"><div class="step-dot">✓</div><div><strong>After 7 days:</strong> Pro-rated refund for unused days in the billing period.</div></div>
+        <div class="info-step"><div class="step-dot">✓</div><div><strong>Cancel anytime:</strong> 30 days notice, no cancellation fees.</div></div>
+        <div class="info-step"><div class="step-dot">✓</div><div><strong>Refund method:</strong> Back to original payment card via Stripe.</div></div>
+      </div>
+
+      <div class="info-card">
+        <h3>📞 Prefer to Talk?</h3>
+        <div class="contact-row"><span class="c-ic">📞</span><div>Call or text: <a href="tel:7174613210">(717) 461-3210</a></div></div>
+        <div class="contact-row"><span class="c-ic">📧</span><div>Email: <a href="mailto:dhital.robin33@gmail.com">dhital.robin33@gmail.com</a></div></div>
+        <div class="contact-row"><span class="c-ic">⏰</span><div>Response within 24 hours, Mon–Sat</div></div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: FORM -->
+    <div class="form-card">
+      <h2>Refund Request Form</h2>
+      <div class="sub">We'll respond within 24 hours and process your refund right away.</div>
+
+      <form id="refundForm" novalidate>
+        <!-- Honeypot -->
+        <input type="text" name="website_url" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rf-name">Your Name *</label>
+            <input type="text" id="rf-name" placeholder="Jane Smith" maxlength="100" required/>
+          </div>
+          <div class="form-group">
+            <label for="rf-biz">Business Name *</label>
+            <input type="text" id="rf-biz" placeholder="Smith's Salon" maxlength="100" required/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rf-email">Email Address *</label>
+            <input type="email" id="rf-email" placeholder="jane@business.com" maxlength="120" required/>
+          </div>
+          <div class="form-group">
+            <label for="rf-phone">Phone Number</label>
+            <input type="tel" id="rf-phone" placeholder="(717) 000-0000" maxlength="20"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rf-plan">Plan You're On *</label>
+            <select id="rf-plan" required>
+              <option value="">— Select —</option>
+              <option value="Starter ($497/mo)">Starter — $497/mo</option>
+              <option value="Growth ($997/mo)">Growth — $997/mo</option>
+              <option value="Authority ($1,997/mo)">Authority — $1,997/mo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="rf-amount">Refund Amount *</label>
+            <select id="rf-amount" required>
+              <option value="">— Select —</option>
+              <option value="Full refund (7-day guarantee)">Full refund — 7-day guarantee</option>
+              <option value="Pro-rated refund (partial month)">Pro-rated — partial month</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="rf-date">Approximate Payment Date *</label>
+          <input type="date" id="rf-date" required/>
+        </div>
+
+        <div class="form-group">
+          <label for="rf-reason">Reason for Refund *</label>
+          <select id="rf-reason" required>
+            <option value="">— Select a reason —</option>
+            <option value="Not satisfied with content quality">Not satisfied with content quality</option>
+            <option value="Content not delivered on time">Content not delivered on time</option>
+            <option value="Business circumstances changed">Business circumstances changed</option>
+            <option value="Service did not match description">Service did not match description</option>
+            <option value="Duplicate charge">Duplicate / incorrect charge</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="rf-details">Additional Details</label>
+          <textarea id="rf-details" placeholder="Any additional context that would help us process your refund quickly..." maxlength="1000"></textarea>
+        </div>
+
+        <div class="submit-area">
+          <button type="submit" class="submit-btn" id="submitBtn">Submit Refund Request →</button>
+          <div class="form-note">🔒 Your information is secure and only used to process your refund</div>
+        </div>
+
+        <div class="result-box" id="resultBox"></div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Harrisburg Content Co. · <a href="index.html">Home</a> · <a href="tel:7174613210">(717) 461-3210</a> · <a href="mailto:dhital.robin33@gmail.com">dhital.robin33@gmail.com</a></p>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  if(location.protocol!=='https:'&&location.hostname!=='localhost'&&!location.hostname.startsWith('127.')){
+    location.replace('https:'+window.location.href.substring(window.location.protocol.length));
+  }
+  if(top!==self){try{top.location=self.location;}catch(e){document.body.innerHTML='';}}
+
+  const form      = document.getElementById('refundForm');
+  const resultBox = document.getElementById('resultBox');
+  const submitBtn = document.getElementById('submitBtn');
+  let lastSubmit  = 0;
+
+  const emailRe = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+  function showResult(type, msg){
+    resultBox.className = 'result-box ' + type;
+    resultBox.innerHTML = msg;
+    resultBox.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    /* Honeypot */
+    if(form.querySelector('[name="website_url"]').value) return;
+
+    /* Rate limit */
+    if(Date.now()-lastSubmit < 60000){
+      showResult('error','Please wait before submitting again.'); return;
+    }
+
+    const name   = document.getElementById('rf-name').value.trim();
+    const biz    = document.getElementById('rf-biz').value.trim();
+    const email  = document.getElementById('rf-email').value.trim();
+    const plan   = document.getElementById('rf-plan').value;
+    const amount = document.getElementById('rf-amount').value;
+    const date   = document.getElementById('rf-date').value;
+    const reason = document.getElementById('rf-reason').value;
+    const details= document.getElementById('rf-details').value.trim();
+
+    if(!name)              {showResult('error','Please enter your name.');return;}
+    if(!biz)               {showResult('error','Please enter your business name.');return;}
+    if(!emailRe.test(email)){showResult('error','Please enter a valid email address.');return;}
+    if(!plan)              {showResult('error','Please select your plan.');return;}
+    if(!amount)            {showResult('error','Please select the refund amount type.');return;}
+    if(!date)              {showResult('error','Please enter your approximate payment date.');return;}
+    if(!reason)            {showResult('error','Please select a reason for the refund.');return;}
+
+    /* Build mailto email body */
+    const subject = encodeURIComponent('REFUND REQUEST — ' + biz + ' (' + plan + ')');
+    const body = encodeURIComponent(
+      'REFUND REQUEST\n' +
+      '==============\n\n' +
+      'Client Name: ' + name + '\n' +
+      'Business: ' + biz + '\n' +
+      'Email: ' + email + '\n' +
+      'Plan: ' + plan + '\n' +
+      'Refund Type: ' + amount + '\n' +
+      'Payment Date: ' + date + '\n' +
+      'Reason: ' + reason + '\n\n' +
+      'Additional Details:\n' + (details || 'None provided') + '\n\n' +
+      '---\n' +
+      'Submitted via harrisburgcontentco.com/refund.html\n' +
+      'Date: ' + new Date().toLocaleString()
+    );
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Opening email...';
+
+    /* Open pre-filled email */
+    window.location.href = 'mailto:dhital.robin33@gmail.com?subject=' + subject + '&body=' + body;
+
+    lastSubmit = Date.now();
+
+    setTimeout(function(){
+      showResult('success',
+        '<strong>✅ Your refund request has been prepared!</strong><br/><br/>' +
+        'Your email app should have opened with your request pre-filled. ' +
+        'Just hit <strong>Send</strong> in your email app and Robin will process your refund within 24 hours.<br/><br/>' +
+        'If your email app didn\'t open, please email <a href="mailto:dhital.robin33@gmail.com" style="color:#0a7c4b;font-weight:700;">dhital.robin33@gmail.com</a> ' +
+        'or call <a href="tel:7174613210" style="color:#0a7c4b;font-weight:700;">(717) 461-3210</a> directly.'
+      );
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Refund Request →';
+      form.reset();
+    }, 1500);
+  });
+})();
+</script>
+</body>
+</html>
