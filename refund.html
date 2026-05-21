@@ -236,6 +236,58 @@
   }
   if(top!==self){try{top.location=self.location;}catch(e){document.body.innerHTML='';}}
 
+  /* ── Check expiring link from subscription email ── */
+  var params  = new URLSearchParams(window.location.search);
+  var expires = parseInt(params.get('expires'), 10);
+  var urlPlan = params.get('plan');
+  var linkedFromEmail = !!expires;
+
+  if (linkedFromEmail) {
+    if (Date.now() > expires) {
+      // Window has closed — replace page content with expiry message
+      document.querySelector('.hero h1').textContent = '⏰ Refund Window Closed';
+      document.querySelector('.hero p').textContent = 'Your 7-day money-back guarantee window has expired.';
+      var formWrap = document.querySelector('.form-card') || document.getElementById('refundForm');
+      if (formWrap) {
+        formWrap.innerHTML =
+          '<div style="text-align:center;padding:40px 20px;">' +
+          '<div style="font-size:52px;margin-bottom:16px;">⏰</div>' +
+          '<h2 style="font-size:22px;font-weight:900;color:#1a1a2e;margin-bottom:12px;">7-Day Refund Window Expired</h2>' +
+          '<p style="color:#7a7a8c;font-size:15px;line-height:1.7;max-width:480px;margin:0 auto 20px;">' +
+          'Your 7-day money-back guarantee window has passed. Per our refund policy, refunds are not available after this period ' +
+          '<strong>unless we failed to deliver your content within the promised timeframe.</strong></p>' +
+          '<p style="color:#7a7a8c;font-size:15px;line-height:1.7;max-width:480px;margin:0 auto 24px;">' +
+          'If you believe your content was never delivered on time, please contact us directly and we\'ll review your case.</p>' +
+          '<a href="mailto:dhital.robin33@gmail.com?subject=Refund%20Dispute%20-%20Late%20Delivery" ' +
+          'style="display:inline-block;background:#e05c2f;color:#fff;padding:13px 28px;border-radius:30px;text-decoration:none;font-weight:700;font-size:15px;margin-bottom:12px;">' +
+          '📧 Contact Robin About a Dispute</a><br/>' +
+          '<a href="tel:7174613210" style="color:#e05c2f;font-weight:700;font-size:14px;">(717) 461-3210</a>' +
+          '</div>';
+      }
+      return; // stop the rest of the script
+    } else {
+      // Window is valid — show a countdown banner and pre-fill plan
+      var daysLeft = Math.ceil((expires - Date.now()) / (1000 * 60 * 60 * 24));
+      var banner = document.createElement('div');
+      banner.style.cssText = 'background:#e8f7f0;border:2px solid #4caf8a;border-radius:10px;padding:14px 20px;margin-bottom:20px;text-align:center;font-size:14px;font-weight:600;color:#1a5a3a;';
+      banner.innerHTML = '✅ Your 7-day refund window is active — <strong>' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '') + ' remaining</strong>';
+      var formEl = document.getElementById('refundForm');
+      if (formEl) formEl.insertAdjacentElement('beforebegin', banner);
+
+      // Pre-fill plan dropdown if it matches
+      if (urlPlan) {
+        var planSelect = document.getElementById('rf-plan');
+        if (planSelect) {
+          for (var i = 0; i < planSelect.options.length; i++) {
+            if (planSelect.options[i].value.toLowerCase().indexOf(urlPlan.toLowerCase()) !== -1) {
+              planSelect.selectedIndex = i; break;
+            }
+          }
+        }
+      }
+    }
+  }
+
   const form      = document.getElementById('refundForm');
   const resultBox = document.getElementById('resultBox');
   const submitBtn = document.getElementById('submitBtn');

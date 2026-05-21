@@ -176,6 +176,9 @@ document.getElementById('subForm').addEventListener('submit', function(e) {
   if (!type)               { showSubMsg('error','Please select your business type.'); return; }
 
   var paymentLink = STRIPE_LINKS[plan] || STRIPE_LINKS['Starter'];
+  // Generate 7-day expiring refund link — embedded in the customer email
+  var refundExpiry = Date.now() + (7 * 24 * 60 * 60 * 1000);
+  var refundLink = 'https://dhitalrk.github.io/harrisburg-content-co-website/refund.html?expires=' + refundExpiry + '&plan=' + encodeURIComponent(plan);
   var btn = document.getElementById('subSubmitBtn');
   btn.disabled = true;
   btn.textContent = '⏳ Sending your payment link...';
@@ -211,6 +214,7 @@ document.getElementById('subForm').addEventListener('submit', function(e) {
       plan_name:    plan,
       plan_price:   price + '/month',
       payment_link: paymentLink,
+      refund_link:  refundLink,
       biz_name:     biz,
       reply_to:     'dhital.robin33@gmail.com'
     };
