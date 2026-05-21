@@ -41,15 +41,6 @@
   <!-- ⚙️  SETUP: Replace the three placeholder values below after creating your free EmailJS account -->
   <!-- Full setup guide: see emailjs_setup_guide.html in your outputs folder -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script>
-    (function(){
-      // Only initialise EmailJS when running on the real site — blocks key abuse from other domains
-      var allowed = ['dhitalrk.github.io', 'localhost', '127.0.0.1'];
-      var host = window.location.hostname;
-      if (allowed.indexOf(host) === -1) { console.warn('EmailJS blocked: unauthorised domain'); return; }
-      try { emailjs.init({ publicKey: 'gQb7RgQ2y8nBbxt3y' }); } catch(e) { console.warn('EmailJS not loaded:', e); }
-    })();
-  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"
@@ -840,7 +831,7 @@
 <!-- ══════════════════════════════════════════
      SECURITY JAVASCRIPT
 ════════════════════════════════════════════ -->
-<script src="hcc-main.js" defer></script>
+<script src="hcc-main.js"></script>
 
 
 </body>

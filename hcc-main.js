@@ -1,3 +1,10 @@
+/* ── EmailJS init (moved here so CSP allows it via external file) ── */
+(function(){
+  var allowed = ['dhitalrk.github.io', 'localhost', '127.0.0.1'];
+  if (allowed.indexOf(window.location.hostname) === -1) { console.warn('EmailJS blocked: unauthorised domain'); return; }
+  try { emailjs.init({ publicKey: 'gQb7RgQ2y8nBbxt3y' }); } catch(e) { console.warn('EmailJS init failed:', e); }
+})();
+
 (function() {
   'use strict';
 
