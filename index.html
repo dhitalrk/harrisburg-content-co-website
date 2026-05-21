@@ -16,7 +16,7 @@
   <meta http-equiv="Content-Security-Policy"
     content="
       default-src 'self';
-      script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net;
+      script-src 'self' https://js.stripe.com https://cdn.jsdelivr.net;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       font-src https://fonts.gstatic.com;
       img-src 'self' data: https:;
@@ -391,7 +391,7 @@
           <li>72-hour delivery guarantee</li>
           <li>7-day money-back guarantee</li>
         </ul>
-        <button class="plan-btn plan-btn-outline" onclick="openSubscribeModal('Starter','$497/mo','497')">
+        <button class="plan-btn plan-btn-outline hcc-sub-btn" data-plan="Starter" data-price="$497/mo">
           🚀 Apply for Starter Plan
         </button>
         <div class="stripe-secure">🔒 Payment link sent to your email after review</div>
@@ -415,7 +415,7 @@
           <li>Monthly performance review</li>
           <li>7-day money-back guarantee</li>
         </ul>
-        <button class="plan-btn plan-btn-filled" onclick="openSubscribeModal('Growth','$997/mo','997')">
+        <button class="plan-btn plan-btn-filled hcc-sub-btn" data-plan="Growth" data-price="$997/mo">
           🚀 Apply for Growth Plan
         </button>
         <div class="stripe-secure">🔒 Payment link sent to your email after review</div>
@@ -438,7 +438,7 @@
           <li>Monthly strategy call with Robin</li>
           <li>7-day money-back guarantee</li>
         </ul>
-        <button class="plan-btn plan-btn-outline" onclick="openSubscribeModal('Authority','$1,997/mo','1997')">
+        <button class="plan-btn plan-btn-outline hcc-sub-btn" data-plan="Authority" data-price="$1,997/mo">
           🚀 Apply for Authority Plan
         </button>
         <div class="stripe-secure">🔒 Payment link sent to your email after review</div>
@@ -670,7 +670,7 @@
 ════════════════════════════════════════════ -->
 <div class="sub-overlay" id="subOverlay">
   <div class="sub-modal">
-    <button class="sub-close" onclick="closeSubscribeModal()">✕</button>
+    <button class="sub-close" id="subCloseBtn">✕</button>
     <div class="sub-header">
       <div class="sub-icon">🚀</div>
       <h2 id="subModalTitle">Apply for Starter Plan</h2>
@@ -731,7 +731,7 @@
 ════════════════════════════════════════════ -->
 <div id="chatWidget">
   <!-- Bubble -->
-  <div id="chatBubble" onclick="toggleChat()">
+  <div id="chatBubble">
     <span id="chatBubbleIcon">💬</span>
     <span id="chatUnread" class="chat-unread" style="display:none;">1</span>
   </div>
@@ -743,13 +743,13 @@
         <div class="chat-name">Harrisburg Content Co.</div>
         <div class="chat-status"><span class="chat-dot"></span> Typically replies fast</div>
       </div>
-      <button class="chat-close-btn" onclick="toggleChat()">✕</button>
+      <button class="chat-close-btn" id="chatCloseBtn">✕</button>
     </div>
     <div class="chat-messages" id="chatMessages"></div>
     <div class="chat-quick-btns" id="chatQuickBtns"></div>
     <div class="chat-input-row">
       <input type="text" id="chatInput" placeholder="Ask us anything..." maxlength="300" autocomplete="off"/>
-      <button id="chatSendBtn" onclick="sendUserMessage()">➤</button>
+      <button id="chatSendBtn">➤</button>
     </div>
   </div>
 </div>
@@ -944,10 +944,25 @@
 /* ══════════════════════════════════════
    SUBSCRIPTION REQUEST MODAL
 ══════════════════════════════════════ */
-function openSubscribeModal(plan, price, priceNum) {
+/* ── HTML entity escaper — prevents XSS when inserting user data into DOM ── */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* ── Attach subscribe buttons via data attributes (no onclick needed) ── */
+document.querySelectorAll('.hcc-sub-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    openSubscribeModal(this.dataset.plan, this.dataset.price);
+  });
+});
+document.getElementById('subCloseBtn').addEventListener('click', closeSubscribeModal);
+
+function openSubscribeModal(plan, price) {
   document.getElementById('subModalTitle').textContent = 'Apply for ' + plan + ' Plan';
-  document.getElementById('subModalDesc').textContent = 'Fill in your details below. Robin will review and email your secure Stripe payment link — usually within a few hours.';
-  document.getElementById('subPlanBadge').innerHTML = '<span>' + plan + ' Plan — ' + price + '/month</span>';
+  document.getElementById('subModalDesc').textContent = 'Fill in your details below and your secure Stripe payment link will be sent straight to your email — instantly.';
+  document.getElementById('subPlanBadge').innerHTML = '<span>' + escHtml(plan) + ' Plan — ' + escHtml(price) + '/month</span>';
   document.getElementById('sub-plan-hidden').value = plan;
   document.getElementById('sub-price-hidden').value = price;
   document.getElementById('subFormMsg').className = 'sub-form-msg';
@@ -1016,11 +1031,11 @@ document.getElementById('subForm').addEventListener('submit', function(e) {
   function showPaymentFallback() {
     showSubMsg('success',
       '✅ Application received!<br><br>' +
-      'Here is your secure payment link for the <strong>' + plan + ' Plan</strong>:<br><br>' +
-      '<a href="' + paymentLink + '" target="_blank" rel="noopener noreferrer" ' +
+      'Here is your secure payment link for the <strong>' + escHtml(plan) + ' Plan</strong>:<br><br>' +
+      '<a href="' + escHtml(paymentLink) + '" target="_blank" rel="noopener noreferrer" ' +
       'style="display:inline-block;background:#e05c2f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin:8px 0;">' +
-      '💳 Complete Payment — ' + price + '/mo →</a><br><br>' +
-      '<small style="color:#7a7a8c;">Bookmark this link. Robin will also follow up at <strong>' + email + '</strong> shortly.</small><br><br>' +
+      '💳 Complete Payment — ' + escHtml(price) + '/mo →</a><br><br>' +
+      '<small style="color:#7a7a8c;">Bookmark this link. Robin will also follow up at <strong>' + escHtml(email) + '</strong> shortly.</small><br><br>' +
       'Questions? Call or text <a href="tel:7174613210">(717) 461-3210</a>.'
     );
     btn.disabled = false;
@@ -1062,7 +1077,7 @@ document.getElementById('subForm').addEventListener('submit', function(e) {
           showSubMsg('success',
             '🎉 Your payment link has been sent to <strong>' + email + '</strong>!<br><br>' +
             'Check your inbox (and spam folder just in case) for an email from Harrisburg Content Co. ' +
-            'with your secure Stripe payment link for the <strong>' + plan + ' Plan</strong>.<br><br>' +
+            'with your secure Stripe payment link for the <strong>' + escHtml(plan) + ' Plan</strong>.<br><br>' +
             'Questions? Call or text <a href="tel:7174613210">(717) 461-3210</a>.'
           );
           btn.disabled = false;
@@ -1321,6 +1336,9 @@ function showSubMsg(type, html) {
   document.getElementById('chatInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') sendUserMessage();
   });
+  document.getElementById('chatBubble').addEventListener('click', toggleChat);
+  document.getElementById('chatCloseBtn').addEventListener('click', toggleChat);
+  document.getElementById('chatSendBtn').addEventListener('click', sendUserMessage);
 
   // Show unread badge after 4 seconds
   setTimeout(function() {
