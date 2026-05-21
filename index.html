@@ -16,11 +16,11 @@
   <meta http-equiv="Content-Security-Policy"
     content="
       default-src 'self';
-      script-src 'self' https://js.stripe.com;
+      script-src 'self' https://js.stripe.com https://cdn.jsdelivr.net;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       font-src https://fonts.gstatic.com;
       img-src 'self' data: https:;
-      connect-src 'self' https://api.stripe.com;
+      connect-src 'self' https://api.stripe.com https://api.emailjs.com;
       frame-src https://js.stripe.com https://hooks.stripe.com;
       frame-ancestors 'none';
       form-action 'self' https://checkout.stripe.com https://buy.stripe.com;
@@ -36,6 +36,17 @@
   <meta property="og:description" content="We create your social media content every month — captions, graphics, hashtags, scheduling. Fully done for you. Starting at $497/mo."/>
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://dhitalrk.github.io/harrisburg-content-co-website/"/>
+
+  <!-- EmailJS — sends payment link directly to customer inbox (free, no backend needed) -->
+  <!-- ⚙️  SETUP: Replace the three placeholder values below after creating your free EmailJS account -->
+  <!-- Full setup guide: see emailjs_setup_guide.html in your outputs folder -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function(){
+      // Replace 'YOUR_EMAILJS_PUBLIC_KEY' with your actual Public Key from emailjs.com → Account → API Keys
+      emailjs.init({ publicKey: 'YOUR_EMAILJS_PUBLIC_KEY' });
+    })();
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"
@@ -381,11 +392,10 @@
           <li>72-hour delivery guarantee</li>
           <li>7-day money-back guarantee</li>
         </ul>
-        <!-- ⚠️ REPLACE href WITH YOUR STRIPE PAYMENT LINK FOR STARTER ($497) -->
-        <a href="https://buy.stripe.com/8x2fZhdYEb9Y071gqT0Jq01" class="plan-btn plan-btn-outline" rel="noopener noreferrer" target="_blank">
-          💳 Subscribe — $497/mo
-        </a>
-        <div class="stripe-secure">🔒 Secured by Stripe &nbsp;·&nbsp; Cancel anytime</div>
+        <button class="plan-btn plan-btn-outline" onclick="openSubscribeModal('Starter','$497/mo','497')">
+          🚀 Apply for Starter Plan
+        </button>
+        <div class="stripe-secure">🔒 Payment link sent to your email after review</div>
         <div class="guarantee-badge">✅ 7-Day Money-Back Guarantee</div>
       </div>
 
@@ -406,11 +416,10 @@
           <li>Monthly performance review</li>
           <li>7-day money-back guarantee</li>
         </ul>
-        <!-- ⚠️ REPLACE href WITH YOUR STRIPE PAYMENT LINK FOR GROWTH ($997) -->
-        <a href="https://buy.stripe.com/3cI00jg6Mema9HBgqT0Jq02" class="plan-btn plan-btn-filled" rel="noopener noreferrer" target="_blank">
-          💳 Subscribe — $997/mo
-        </a>
-        <div class="stripe-secure">🔒 Secured by Stripe &nbsp;·&nbsp; Cancel anytime</div>
+        <button class="plan-btn plan-btn-filled" onclick="openSubscribeModal('Growth','$997/mo','997')">
+          🚀 Apply for Growth Plan
+        </button>
+        <div class="stripe-secure">🔒 Payment link sent to your email after review</div>
         <div class="guarantee-badge">✅ 7-Day Money-Back Guarantee</div>
       </div>
 
@@ -430,11 +439,10 @@
           <li>Monthly strategy call with Robin</li>
           <li>7-day money-back guarantee</li>
         </ul>
-        <!-- ⚠️ REPLACE href WITH YOUR STRIPE PAYMENT LINK FOR AUTHORITY ($1,997) -->
-        <a href="https://buy.stripe.com/cNi5kDdYE3HwcTN0rV0Jq03" class="plan-btn plan-btn-outline" rel="noopener noreferrer" target="_blank">
-          💳 Subscribe — $1,997/mo
-        </a>
-        <div class="stripe-secure">🔒 Secured by Stripe &nbsp;·&nbsp; Cancel anytime</div>
+        <button class="plan-btn plan-btn-outline" onclick="openSubscribeModal('Authority','$1,997/mo','1997')">
+          🚀 Apply for Authority Plan
+        </button>
+        <div class="stripe-secure">🔒 Payment link sent to your email after review</div>
         <div class="guarantee-badge">✅ 7-Day Money-Back Guarantee</div>
       </div>
 
@@ -659,6 +667,174 @@
 </footer>
 
 <!-- ══════════════════════════════════════════
+     SUBSCRIPTION REQUEST MODAL
+════════════════════════════════════════════ -->
+<div class="sub-overlay" id="subOverlay">
+  <div class="sub-modal">
+    <button class="sub-close" onclick="closeSubscribeModal()">✕</button>
+    <div class="sub-header">
+      <div class="sub-icon">🚀</div>
+      <h2 id="subModalTitle">Apply for Starter Plan</h2>
+      <p id="subModalDesc">Fill in your details and your secure Stripe payment link will be sent straight to your email — instantly.</p>
+    </div>
+    <div class="sub-plan-badge" id="subPlanBadge"></div>
+    <form id="subForm" novalidate>
+      <input type="text" name="hp_url" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true"/>
+      <div class="sub-grid">
+        <div class="sub-fg">
+          <label>Your Name *</label>
+          <input type="text" id="sub-name" placeholder="Jane Smith" maxlength="100" required/>
+        </div>
+        <div class="sub-fg">
+          <label>Business Name *</label>
+          <input type="text" id="sub-biz" placeholder="Smith's Salon" maxlength="100" required/>
+        </div>
+        <div class="sub-fg">
+          <label>Email Address *</label>
+          <input type="email" id="sub-email" placeholder="jane@yourbusiness.com" maxlength="120" required/>
+        </div>
+        <div class="sub-fg">
+          <label>Phone Number *</label>
+          <input type="tel" id="sub-phone" placeholder="(717) 000-0000" maxlength="20" required/>
+        </div>
+        <div class="sub-fg sub-full">
+          <label>Business Type *</label>
+          <select id="sub-type" required>
+            <option value="">— What kind of business do you have? —</option>
+            <option>Restaurant / Café / Food</option>
+            <option>Salon / Spa / Beauty</option>
+            <option>Gym / Fitness / Wellness</option>
+            <option>Contractor / Trades / Home Services</option>
+            <option>Real Estate</option>
+            <option>Retail / Boutique</option>
+            <option>Medical / Dental</option>
+            <option>Auto / Automotive</option>
+            <option>Professional Services</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="sub-fg sub-full">
+          <label>Tell us about your business <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+          <textarea id="sub-msg" placeholder="e.g. We're a family-owned Nepali restaurant in Harrisburg. We want more customers finding us on social media..." maxlength="600"></textarea>
+        </div>
+      </div>
+      <input type="hidden" id="sub-plan-hidden"/>
+      <input type="hidden" id="sub-price-hidden"/>
+      <button type="submit" class="sub-submit-btn" id="subSubmitBtn">Send My Application →</button>
+      <div class="sub-form-msg" id="subFormMsg"></div>
+      <p class="sub-note">🔒 Your info is secure. Your Stripe payment link will be emailed to you instantly upon submission.</p>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     AI CHAT WIDGET
+════════════════════════════════════════════ -->
+<div id="chatWidget">
+  <!-- Bubble -->
+  <div id="chatBubble" onclick="toggleChat()">
+    <span id="chatBubbleIcon">💬</span>
+    <span id="chatUnread" class="chat-unread" style="display:none;">1</span>
+  </div>
+  <!-- Window -->
+  <div id="chatWindow">
+    <div class="chat-header">
+      <div class="chat-avatar">HC</div>
+      <div>
+        <div class="chat-name">Harrisburg Content Co.</div>
+        <div class="chat-status"><span class="chat-dot"></span> Typically replies fast</div>
+      </div>
+      <button class="chat-close-btn" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-quick-btns" id="chatQuickBtns"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Ask us anything..." maxlength="300" autocomplete="off"/>
+      <button id="chatSendBtn" onclick="sendUserMessage()">➤</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── SUBSCRIPTION MODAL ── */
+.sub-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;align-items:center;justify-content:center;padding:16px;}
+.sub-overlay.open{display:flex;}
+.sub-modal{background:#fff;border-radius:18px;padding:32px;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.3);position:relative;}
+.sub-close{position:absolute;top:14px;right:14px;background:#f0f0f5;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;font-weight:700;color:var(--navy);display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.sub-close:hover{background:var(--coral);color:#fff;}
+.sub-header{text-align:center;margin-bottom:18px;}
+.sub-icon{font-size:42px;margin-bottom:8px;}
+.sub-header h2{font-size:22px;font-weight:900;color:var(--navy);margin-bottom:6px;}
+.sub-header p{font-size:14px;color:var(--muted);line-height:1.5;}
+.sub-plan-badge{text-align:center;margin-bottom:18px;}
+.sub-plan-badge span{background:var(--coral-light);color:var(--coral);padding:6px 18px;border-radius:20px;font-size:14px;font-weight:700;border:1px solid rgba(224,92,47,.25);}
+.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+@media(max-width:500px){.sub-grid{grid-template-columns:1fr;}}
+.sub-fg{display:flex;flex-direction:column;gap:5px;}
+.sub-fg.sub-full{grid-column:1/-1;}
+.sub-fg label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--navy);}
+.sub-fg input,.sub-fg select,.sub-fg textarea{padding:10px 13px;border:2px solid #e0e0ea;border-radius:9px;font-size:14px;font-family:inherit;color:var(--navy);background:var(--gray);outline:none;transition:border-color .2s;}
+.sub-fg input:focus,.sub-fg select:focus,.sub-fg textarea:focus{border-color:var(--coral);background:#fff;}
+.sub-fg textarea{resize:vertical;min-height:80px;}
+.sub-submit-btn{width:100%;background:var(--coral);color:#fff;border:none;padding:14px;border-radius:30px;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;box-shadow:0 4px 18px rgba(224,92,47,.35);margin-top:4px;}
+.sub-submit-btn:hover{background:var(--coral-dark);transform:translateY(-1px);}
+.sub-submit-btn:disabled{background:#ccc;cursor:not-allowed;transform:none;}
+.sub-form-msg{font-size:14px;padding:12px;border-radius:8px;text-align:center;margin-top:10px;display:none;line-height:1.6;}
+.sub-form-msg.success{background:#e0f5ed;border:1px solid #a8dfc5;color:#0a7c4b;display:block;}
+.sub-form-msg.error{background:#fde8e8;border:1px solid #f5a5a5;color:#c0392b;display:block;}
+.sub-note{font-size:12px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.6;}
+
+/* ── CHAT WIDGET ── */
+#chatWidget{position:fixed;bottom:24px;right:24px;z-index:1500;font-family:'Inter','Segoe UI',sans-serif;}
+#chatBubble{width:58px;height:58px;background:var(--coral);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(224,92,47,.5);transition:transform .2s,box-shadow .2s;position:relative;}
+#chatBubble:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(224,92,47,.6);}
+#chatBubbleIcon{font-size:24px;transition:transform .3s;}
+.chat-unread{position:absolute;top:-4px;right:-4px;background:#e74c3c;color:#fff;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
+
+#chatWindow{
+  position:absolute;bottom:70px;right:0;
+  width:340px;background:#fff;border-radius:16px;
+  box-shadow:0 8px 40px rgba(0,0,0,.18);
+  display:none;flex-direction:column;overflow:hidden;
+  border:1px solid #e8e8f0;
+  max-height:480px;
+}
+#chatWindow.open{display:flex;}
+
+.chat-header{background:var(--navy);padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.chat-avatar{width:36px;height:36px;background:var(--coral);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;}
+.chat-name{color:#fff;font-weight:700;font-size:14px;}
+.chat-status{color:rgba(255,255,255,.6);font-size:11px;display:flex;align-items:center;gap:5px;margin-top:2px;}
+.chat-dot{width:7px;height:7px;background:#2ecc71;border-radius:50%;display:inline-block;}
+.chat-close-btn{margin-left:auto;background:rgba(255,255,255,.1);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0;}
+.chat-close-btn:hover{background:rgba(255,255,255,.25);}
+
+.chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0;}
+.chat-msg{max-width:82%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word;}
+.chat-msg.bot{background:var(--gray);color:var(--navy);border-bottom-left-radius:4px;align-self:flex-start;}
+.chat-msg.user{background:var(--coral);color:#fff;border-bottom-right-radius:4px;align-self:flex-end;}
+.chat-msg a{color:var(--coral);text-decoration:underline;}
+.chat-msg.bot a{color:var(--coral-dark);}
+.chat-typing{display:flex;gap:4px;align-items:center;padding:10px 13px;background:var(--gray);border-radius:14px;border-bottom-left-radius:4px;align-self:flex-start;width:52px;}
+.chat-typing span{width:7px;height:7px;background:var(--muted);border-radius:50%;animation:typing .9s infinite;}
+.chat-typing span:nth-child(2){animation-delay:.2s;}
+.chat-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes typing{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
+
+.chat-quick-btns{padding:0 12px 10px;display:flex;flex-wrap:wrap;gap:7px;flex-shrink:0;}
+.chat-quick-btn{background:var(--coral-light);color:var(--coral);border:1px solid rgba(224,92,47,.25);padding:6px 12px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.chat-quick-btn:hover{background:var(--coral);color:#fff;}
+
+.chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #f0f0f5;flex-shrink:0;}
+#chatInput{flex:1;padding:9px 13px;border:2px solid #e0e0ea;border-radius:20px;font-size:13px;font-family:inherit;color:var(--navy);outline:none;transition:border-color .2s;background:var(--gray);}
+#chatInput:focus{border-color:var(--coral);background:#fff;}
+#chatSendBtn{background:var(--coral);color:#fff;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0;}
+#chatSendBtn:hover{background:var(--coral-dark);}
+
+@media(max-width:400px){#chatWindow{width:calc(100vw - 32px);right:-8px;}}
+</style>
+
+<!-- ══════════════════════════════════════════
      SECURITY JAVASCRIPT
 ════════════════════════════════════════════ -->
 <script>
@@ -762,6 +938,400 @@
 
   /* 10 — Subresource Integrity check placeholder (enforced via CSP) */
 
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════
+   SUBSCRIPTION REQUEST MODAL
+══════════════════════════════════════ */
+function openSubscribeModal(plan, price, priceNum) {
+  document.getElementById('subModalTitle').textContent = 'Apply for ' + plan + ' Plan';
+  document.getElementById('subModalDesc').textContent = 'Fill in your details below. Robin will review and email your secure Stripe payment link — usually within a few hours.';
+  document.getElementById('subPlanBadge').innerHTML = '<span>' + plan + ' Plan — ' + price + '/month</span>';
+  document.getElementById('sub-plan-hidden').value = plan;
+  document.getElementById('sub-price-hidden').value = price;
+  document.getElementById('subFormMsg').className = 'sub-form-msg';
+  document.getElementById('subFormMsg').textContent = '';
+  document.getElementById('subForm').reset();
+  document.getElementById('sub-plan-hidden').value = plan;
+  document.getElementById('sub-price-hidden').value = price;
+  document.getElementById('subOverlay').classList.add('open');
+}
+function closeSubscribeModal() {
+  document.getElementById('subOverlay').classList.remove('open');
+}
+document.getElementById('subOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeSubscribeModal();
+});
+
+const emailRe2 = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+let subLastSubmit = 0;
+
+// ⚙️ EMAILJS SETUP — replace these three values with your own from emailjs.com
+// See the emailjs_setup_guide.html file for step-by-step instructions
+var EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';       // e.g. 'service_abc123'
+var EMAILJS_CUSTOMER_TEMPLATE = 'YOUR_CUSTOMER_TEMPLATE_ID'; // e.g. 'template_xyz789'
+var EMAILJS_NOTIFY_TEMPLATE   = 'YOUR_NOTIFY_TEMPLATE_ID';   // e.g. 'template_notify1'
+
+var STRIPE_LINKS = {
+  Starter:   'https://buy.stripe.com/8x2fZhdYEb9Y071gqT0Jq01',
+  Growth:    'https://buy.stripe.com/3cI00jg6Mema9HBgqT0Jq02',
+  Authority: 'https://buy.stripe.com/cNi5kDdYE3HwcTN0rV0Jq03'
+};
+
+document.getElementById('subForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (this.querySelector('[name="hp_url"]').value) return;
+  if (Date.now() - subLastSubmit < 30000) {
+    showSubMsg('error', 'Please wait before submitting again.'); return;
+  }
+
+  var name  = document.getElementById('sub-name').value.trim();
+  var biz   = document.getElementById('sub-biz').value.trim();
+  var email = document.getElementById('sub-email').value.trim();
+  var phone = document.getElementById('sub-phone').value.trim();
+  var type  = document.getElementById('sub-type').value;
+  var plan  = document.getElementById('sub-plan-hidden').value;
+  var price = document.getElementById('sub-price-hidden').value;
+  var msg   = document.getElementById('sub-msg').value.trim();
+
+  if (!name)               { showSubMsg('error','Please enter your name.'); return; }
+  if (!biz)                { showSubMsg('error','Please enter your business name.'); return; }
+  if (!emailRe2.test(email)){ showSubMsg('error','Please enter a valid email address.'); return; }
+  if (!phone)              { showSubMsg('error','Please enter your phone number.'); return; }
+  if (!type)               { showSubMsg('error','Please select your business type.'); return; }
+
+  var paymentLink = STRIPE_LINKS[plan] || STRIPE_LINKS['Starter'];
+  var btn = document.getElementById('subSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Sending your payment link...';
+  subLastSubmit = Date.now();
+
+  // Check if EmailJS has been configured
+  var emailjsReady = (
+    EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID' &&
+    EMAILJS_CUSTOMER_TEMPLATE !== 'YOUR_CUSTOMER_TEMPLATE_ID'
+  );
+
+  if (emailjsReady) {
+    // ── Automated path: send payment link directly to customer ──
+    var customerParams = {
+      to_email:     email,
+      to_name:      name,
+      plan_name:    plan,
+      plan_price:   price + '/month',
+      payment_link: paymentLink,
+      biz_name:     biz,
+      reply_to:     'dhital.robin33@gmail.com'
+    };
+    var notifyParams = {
+      client_name:  name,
+      client_biz:   biz,
+      client_email: email,
+      client_phone: phone,
+      biz_type:     type,
+      plan_name:    plan,
+      plan_price:   price + '/month',
+      payment_link: paymentLink,
+      client_msg:   msg || 'Not provided',
+      submitted_at: new Date().toLocaleString()
+    };
+
+    // Send customer email first, then Robin's notification
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CUSTOMER_TEMPLATE, customerParams)
+      .then(function() {
+        return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_NOTIFY_TEMPLATE, notifyParams);
+      })
+      .then(function() {
+        showSubMsg('success',
+          '🎉 Your payment link has been sent to <strong>' + email + '</strong>!<br><br>' +
+          'Check your inbox (and spam folder just in case) for an email from Harrisburg Content Co. ' +
+          'with your secure Stripe payment link for the <strong>' + plan + ' Plan</strong>.<br><br>' +
+          'Questions? Call or text <a href="tel:7174613210">(717) 461-3210</a>.'
+        );
+        btn.disabled = false;
+        btn.textContent = 'Send My Application →';
+        document.getElementById('subForm').reset();
+        document.getElementById('sub-plan-hidden').value = plan;
+        document.getElementById('sub-price-hidden').value = price;
+      })
+      .catch(function(err) {
+        console.error('EmailJS error:', err);
+        // Fallback: show payment link on screen if email fails
+        showSubMsg('success',
+          '✅ Application received!<br><br>' +
+          'Here is your secure payment link for the <strong>' + plan + ' Plan</strong>:<br><br>' +
+          '<a href="' + paymentLink + '" target="_blank" rel="noopener noreferrer" ' +
+          'style="display:inline-block;background:#e05c2f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin:8px 0;">' +
+          '💳 Complete Payment →</a><br><br>' +
+          'Questions? Call or text <a href="tel:7174613210">(717) 461-3210</a>.'
+        );
+        btn.disabled = false;
+        btn.textContent = 'Send My Application →';
+      });
+
+  } else {
+    // ── Fallback path (EmailJS not yet configured): show link on screen + notify Robin ──
+    var subjectLine = encodeURIComponent('NEW APPLICATION — ' + biz + ' (' + plan + ' Plan)');
+    var emailBody = encodeURIComponent(
+      'NEW SUBSCRIPTION APPLICATION\n\n' +
+      'Plan: ' + plan + ' — ' + price + '/month\n' +
+      'Name: ' + name + '\nBusiness: ' + biz + '\nType: ' + type +
+      '\nEmail: ' + email + '\nPhone: ' + phone +
+      '\n\nAbout: ' + (msg || 'Not provided') +
+      '\n\nPayment link to send them:\n' + paymentLink +
+      '\n\nSubmitted: ' + new Date().toLocaleString()
+    );
+    window.open('mailto:dhital.robin33@gmail.com?subject=' + subjectLine + '&body=' + emailBody);
+
+    setTimeout(function() {
+      showSubMsg('success',
+        '✅ Application received! Here is your secure payment link for the <strong>' + plan + ' Plan</strong>:<br><br>' +
+        '<a href="' + paymentLink + '" target="_blank" rel="noopener noreferrer" ' +
+        'style="display:inline-block;background:#e05c2f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin:8px 0;">' +
+        '💳 Complete Payment — ' + price + '/mo →</a><br><br>' +
+        '<small style="color:#7a7a8c;">Save or bookmark this link. Robin will also follow up at <strong>' + email + '</strong>.</small><br><br>' +
+        'Questions? Call or text <a href="tel:7174613210">(717) 461-3210</a>.'
+      );
+      btn.disabled = false;
+      btn.textContent = 'Send My Application →';
+      document.getElementById('subForm').reset();
+    }, 800);
+  }
+});
+
+function showSubMsg(type, html) {
+  const m = document.getElementById('subFormMsg');
+  m.className = 'sub-form-msg ' + type;
+  m.innerHTML = html;
+}
+
+/* ══════════════════════════════════════
+   AI CHAT WIDGET
+══════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  const PLANS = {
+    Starter:   { price:'$497/mo',  link:'https://buy.stripe.com/8x2fZhdYEb9Y071gqT0Jq01' },
+    Growth:    { price:'$997/mo',  link:'https://buy.stripe.com/3cI00jg6Mema9HBgqT0Jq02' },
+    Authority: { price:'$1,997/mo',link:'https://buy.stripe.com/cNi5kDdYE3HwcTN0rV0Jq03' }
+  };
+
+  const KB = [
+    { keys:['hello','hi','hey','good morning','good afternoon','good evening','howdy'],
+      reply:"Hey there! 👋 Welcome to Harrisburg Content Co.! I'm here to answer any questions about our social media services. What can I help you with today?",
+      quick:['What do you do?','How much does it cost?','How do I get started?'] },
+    { keys:['what do you do','what is','who are you','tell me about','what services','what you offer'],
+      reply:"We're a social media content agency serving local Harrisburg businesses! 🎨\n\nWe create everything for your social media — captions, branded graphics, hashtags, and post scheduling — every single month. You send us photos, we handle the rest. Starting at just $497/month.",
+      quick:['See pricing plans','How does it work?','What businesses do you serve?'] },
+    { keys:['price','cost','how much','pricing','plans','packages','rate','fee','charge'],
+      reply:"We have 3 simple monthly plans:\n\n🔹 <strong>Starter — $497/mo</strong>\n12 posts, 3 graphics, 1 platform\n\n🔸 <strong>Growth — $997/mo</strong> ⭐ Most Popular\n30 posts, 8 graphics, 2 platforms, Reel scripts\n\n🔺 <strong>Authority — $1,997/mo</strong>\n60 posts, 16 graphics, 3 platforms, blog + newsletter\n\nAll plans include a 7-day money-back guarantee!",
+      quick:['Apply for Starter','Apply for Growth','Apply for Authority'] },
+    { keys:['how does it work','process','steps','how it works','what happens'],
+      reply:"Super simple — 4 steps:\n\n1️⃣ <strong>Fill out our intake form</strong> (10 min, one-time)\n2️⃣ <strong>Send us phone photos</strong> each month\n3️⃣ <strong>We build your content</strong> — captions, graphics, calendar\n4️⃣ <strong>We schedule everything</strong> — your page stays active all month\n\nYour only job? Reply to the customers who reach out! 😊",
+      quick:['What does it cost?','How do I sign up?','Do you post for me?'] },
+    { keys:['starter','497'],
+      reply:"The <strong>Starter Plan</strong> at $497/month is perfect for getting started! You get:\n\n✅ 12 posts per month\n✅ 3 branded graphics\n✅ 1 platform (Instagram or Facebook)\n✅ Full captions + hashtags\n✅ Content calendar + scheduling\n✅ 7-day money-back guarantee\n\nReady to apply?",
+      quick:['Apply for Starter','Tell me about Growth plan','How do I apply?'] },
+    { keys:['growth','997'],
+      reply:"The <strong>Growth Plan</strong> at $997/month is our most popular! You get:\n\n✅ 30 posts per month\n✅ 8 branded graphics\n✅ Instagram + Facebook (2 platforms)\n✅ 4 Reel/TikTok video scripts\n✅ 4 Google Business posts\n✅ Monthly performance review\n✅ 7-day money-back guarantee",
+      quick:['Apply for Growth','Tell me about Authority plan','How does it work?'] },
+    { keys:['authority','1997','1,997'],
+      reply:"The <strong>Authority Plan</strong> at $1,997/month is for businesses that want to dominate Harrisburg! You get:\n\n✅ 60 posts per month\n✅ 16 branded graphics\n✅ 3 platforms covered\n✅ 8 video scripts\n✅ Monthly blog post\n✅ Email newsletter\n✅ Monthly strategy call with Robin",
+      quick:['Apply for Authority','See all plans','How does it work?'] },
+    { keys:['apply','sign up','get started','subscribe','join','start'],
+      reply:"Great — let's get you started! 🎉\n\nJust click the button below for your chosen plan. You'll fill out a quick form and Robin will personally email you your secure payment link within a few hours.",
+      quick:['Apply for Starter ($497)','Apply for Growth ($997)','Apply for Authority ($1,997)'] },
+    { keys:['refund','money back','guarantee','cancel','cancellation'],
+      reply:"We offer a <strong>7-day money-back guarantee</strong> on your first delivery — no questions asked.\n\nAfter that, you can cancel anytime with 30 days notice. No contracts, no cancellation fees.\n\nIf you ever need a refund, just email dhital.robin33@gmail.com or call (717) 461-3210 and we process it within 24 hours.",
+      quick:['How do I request a refund?','See pricing plans','How does it work?'] },
+    { keys:['refund request','request refund','want refund','need refund'],
+      reply:"To request a refund, visit our <a href='refund.html'>Refund Request page</a> — it takes 2 minutes and Robin processes it within 24 hours.\n\nOr contact us directly:\n📞 (717) 461-3210\n📧 dhital.robin33@gmail.com",
+      quick:['Open refund page','Talk to someone','See our policy'] },
+    { keys:['contract','commitment','lock in','minimum','long term'],
+      reply:"No contracts at all! 🙌\n\nAll our plans are <strong>month-to-month</strong>. Cancel anytime with 30 days notice. We earn your business every single month by delivering great results — not by locking you in.",
+      quick:['See pricing plans','How does it work?','Apply for a plan'] },
+    { keys:['instagram','facebook','tiktok','social media','platform','post','schedule'],
+      reply:"Yes — we cover all the major platforms! 📱\n\n📸 Instagram\n👍 Facebook\n🎬 TikTok / Reels\n📍 Google Business Profile\n\nDepending on your plan, we manage 1–3 platforms. We write the captions, design the graphics, and schedule everything at the best times for engagement.",
+      quick:['See what\'s in each plan','How does it work?','Get started'] },
+    { keys:['photo','picture','image','i don\'t have photos','no photos'],
+      reply:"No professional photos needed! 📸\n\nJust snap a few phone photos of your business, products, or team each month and send them to us via WhatsApp, email, or Google Drive.\n\nGood lighting + clean background = great content. We handle all the design and graphics on top of your photos.",
+      quick:['How does it work?','See pricing plans','Get started'] },
+    { keys:['restaurant','salon','gym','contractor','real estate','dentist','auto','retail','small business','local','business type'],
+      reply:"We work with all kinds of Harrisburg local businesses! 🏙️\n\n🍽️ Restaurants & cafés\n💅 Salons & spas\n💪 Gyms & fitness studios\n🔨 Contractors & trades\n🏠 Real estate agents\n🦷 Dental & medical offices\n🚗 Auto shops\n🛍️ Retail & boutiques\n\nIf you serve local customers, we can help!",
+      quick:['See pricing plans','How does it work?','Apply for a plan'] },
+    { keys:['harrisburg','pennsylvania','pa','local','area','location','where'],
+      reply:"We're right here in Harrisburg, PA! 📍\n\nWe serve businesses throughout Central Pennsylvania including Harrisburg, Camp Hill, Mechanicsburg, Hershey, York, and Lancaster.\n\nBeing local means we create content with real Harrisburg context that resonates with your community.",
+      quick:['See our plans','Get started','Contact Robin'] },
+    { keys:['results','work','effective','roi','does it work','testimonial','proof','reviews'],
+      reply:"Our clients see real results! 📈\n\n✅ Most see improved engagement within 30 days\n✅ Real business results (calls, bookings, walk-ins) within 60–90 days\n✅ Consistent posting builds local brand recognition fast\n\nOne restaurant client tripled their Instagram engagement in month 1 and started getting reservation DMs from social media for the first time.",
+      quick:['See pricing plans','Apply for a plan','How does it work?'] },
+    { keys:['how long','timeline','when','turnaround','delivery','deliver'],
+      reply:"We deliver fast! ⚡\n\n📦 <strong>72-hour delivery guarantee</strong> on your monthly content package\n✅ You review and approve before anything goes live\n📅 Full month scheduled before the month begins\n\nOnce you send us photos and approve content, everything is set for the entire month.",
+      quick:['See pricing plans','How does it work?','Apply now'] },
+    { keys:['contact','call','phone','email','talk','speak','robin','reach'],
+      reply:"You can reach Robin directly:\n\n📞 <a href='tel:7174613210'>(717) 461-3210</a> — call or text anytime\n📧 dhital.robin33@gmail.com\n\nRobin responds within 24 hours, Monday–Saturday.",
+      quick:['Apply for a plan','See pricing','How does it work?'] },
+    { keys:['free','trial','demo','sample','example','see what you do'],
+      reply:"We don't offer a free trial, but we do two things to make it risk-free:\n\n🛡️ <strong>7-day money-back guarantee</strong> — if you're not happy with your first delivery, full refund, no questions.\n\n📋 <strong>Review before posting</strong> — you see and approve every post before it goes live.\n\nYou've got nothing to lose!",
+      quick:['Apply for Starter','See all plans','How does it work?'] },
+    { keys:['payment','pay','stripe','card','billing','charge','invoice'],
+      reply:"Payments are handled securely through <strong>Stripe</strong> — the same platform used by Amazon and Shopify. 🔒\n\nHere's how it works:\n1️⃣ Apply for your plan (fill out the form)\n2️⃣ Robin reviews and emails you a personal payment link\n3️⃣ You pay securely via Stripe\n4️⃣ We get started on your content!\n\nYou'll be billed monthly on the same date.",
+      quick:['Apply for a plan','See pricing','Questions?'] },
+  ];
+
+  const QUICK_START = ['What do you do?','How much does it cost?','How do I get started?','I have a question'];
+  let chatOpen = false;
+  let greeted  = false;
+
+  function addMsg(text, who, delay) {
+    setTimeout(function() {
+      const msgs = document.getElementById('chatMessages');
+      const typing = msgs.querySelector('.chat-typing');
+      if (typing) typing.remove();
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + who;
+      div.innerHTML = text.replace(/\n/g,'<br/>');
+      msgs.appendChild(div);
+      msgs.scrollTop = msgs.scrollHeight;
+    }, delay || 0);
+  }
+
+  function showTyping(duration) {
+    const msgs = document.getElementById('chatMessages');
+    const t = document.createElement('div');
+    t.className = 'chat-typing';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    msgs.appendChild(t);
+    msgs.scrollTop = msgs.scrollHeight;
+    return duration;
+  }
+
+  function setQuickBtns(btns) {
+    const c = document.getElementById('chatQuickBtns');
+    c.innerHTML = '';
+    (btns || []).forEach(function(label) {
+      const b = document.createElement('button');
+      b.className = 'chat-quick-btn';
+      b.textContent = label;
+      b.addEventListener('click', function() {
+        handleUserInput(label);
+      });
+      c.appendChild(b);
+    });
+  }
+
+  function toggleChat() {
+    chatOpen = !chatOpen;
+    const win = document.getElementById('chatWindow');
+    const icon = document.getElementById('chatBubbleIcon');
+    const unread = document.getElementById('chatUnread');
+    if (chatOpen) {
+      win.classList.add('open');
+      icon.textContent = '✕';
+      unread.style.display = 'none';
+      if (!greeted) {
+        greeted = true;
+        setTimeout(function() {
+          showTyping(800);
+          addMsg("👋 Hi! Welcome to Harrisburg Content Co.!\n\nI'm here to answer any questions about our social media services. What can I help you with today?", 'bot', 900);
+          setQuickBtns(QUICK_START);
+        }, 300);
+      }
+    } else {
+      win.classList.remove('open');
+      icon.textContent = '💬';
+    }
+  }
+
+  function getBotReply(input) {
+    const low = input.toLowerCase();
+    // Check apply shortcuts
+    if (/apply.*starter|starter.*apply|get starter|want starter/i.test(low)) {
+      return { reply: null, action: 'subscribe', plan:'Starter' };
+    }
+    if (/apply.*growth|growth.*apply|get growth|want growth/i.test(low)) {
+      return { reply: null, action: 'subscribe', plan:'Growth' };
+    }
+    if (/apply.*authority|authority.*apply|get authority|want authority/i.test(low)) {
+      return { reply: null, action: 'subscribe', plan:'Authority' };
+    }
+    if (/apply.*starter.*\$497|starter.*\$497/i.test(low)) {
+      return { reply: null, action: 'subscribe', plan:'Starter' };
+    }
+    if (/apply.*growth.*\$997|growth.*\$997/i.test(low)) {
+      return { reply: null, action: 'subscribe', plan:'Growth' };
+    }
+    if (/apply.*authority.*\$1,997|authority.*\$1,997/i.test(low)) {
+      return { reply: null, action: 'subscribe', plan:'Authority' };
+    }
+    for (let i = 0; i < KB.length; i++) {
+      if (KB[i].keys.some(function(k){ return low.includes(k); })) {
+        return { reply: KB[i].reply, quick: KB[i].quick };
+      }
+    }
+    return null;
+  }
+
+  function handleUserInput(text) {
+    document.getElementById('chatQuickBtns').innerHTML = '';
+    addMsg(text, 'user');
+    const result = getBotReply(text);
+    if (result && result.action === 'subscribe') {
+      const plan = result.plan;
+      const p = PLANS[plan];
+      showTyping(700);
+      addMsg("Great choice! 🎉 Let me open the application form for the <strong>" + plan + " Plan (" + p.price + ")</strong> right now.", 'bot', 800);
+      setTimeout(function() {
+        openSubscribeModal(plan, p.price, p.price.replace(/[^0-9]/g,''));
+      }, 1200);
+      setQuickBtns(['See all plans','How does it work?','Contact Robin']);
+    } else if (result) {
+      showTyping(700);
+      addMsg(result.reply, 'bot', 800);
+      if (result.quick) {
+        setTimeout(function(){ setQuickBtns(result.quick); }, 900);
+      }
+    } else {
+      // Fallback: capture message
+      showTyping(900);
+      addMsg("That's a great question! I'm not sure I have the exact answer, but Robin will! 😊\n\nI'll connect you directly — you can reach Robin at:\n📞 <a href='tel:7174613210'>(717) 461-3210</a>\n📧 dhital.robin33@gmail.com\n\nOr click below to send your question now:", 'bot', 1000);
+      setTimeout(function() {
+        const esc = text.replace(/[<>&"]/g,'');
+        const sub = encodeURIComponent('Website Chat Inquiry — ' + esc.slice(0,40));
+        const bd = encodeURIComponent('Hi Robin,\n\nA visitor asked this on your website chat:\n\n"' + esc + '"\n\nPlease follow up with them.');
+        setQuickBtns(['📧 Email my question', 'See pricing plans', 'Apply for a plan']);
+        document.querySelectorAll('.chat-quick-btn').forEach(function(btn) {
+          if (btn.textContent === '📧 Email my question') {
+            btn.addEventListener('click', function() {
+              window.location.href = 'mailto:dhital.robin33@gmail.com?subject=' + sub + '&body=' + bd;
+            });
+          }
+        });
+      }, 1100);
+    }
+  }
+
+  function sendUserMessage() {
+    const inp = document.getElementById('chatInput');
+    const txt = inp.value.trim();
+    if (!txt) return;
+    inp.value = '';
+    handleUserInput(txt);
+  }
+
+  document.getElementById('chatInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') sendUserMessage();
+  });
+
+  // Show unread badge after 4 seconds
+  setTimeout(function() {
+    if (!chatOpen) document.getElementById('chatUnread').style.display = 'flex';
+  }, 4000);
+
+  window.toggleChat = toggleChat;
 })();
 </script>
 
