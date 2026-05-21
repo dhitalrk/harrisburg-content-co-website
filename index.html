@@ -43,8 +43,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
     (function(){
-      // Replace 'YOUR_EMAILJS_PUBLIC_KEY' with your actual Public Key from emailjs.com → Account → API Keys
-      emailjs.init({ publicKey: 'gQb7RgQ2y8nBbxt3y' });
+      try { emailjs.init({ publicKey: 'gQb7RgQ2y8nBbxt3y' }); } catch(e) { console.warn('EmailJS not loaded:', e); }
     })();
   </script>
 
@@ -1014,7 +1013,23 @@ document.getElementById('subForm').addEventListener('submit', function(e) {
     EMAILJS_CUSTOMER_TEMPLATE !== 'YOUR_CUSTOMER_TEMPLATE_ID'
   );
 
-  if (emailjsReady) {
+  function showPaymentFallback() {
+    showSubMsg('success',
+      '✅ Application received!<br><br>' +
+      'Here is your secure payment link for the <strong>' + plan + ' Plan</strong>:<br><br>' +
+      '<a href="' + paymentLink + '" target="_blank" rel="noopener noreferrer" ' +
+      'style="display:inline-block;background:#e05c2f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin:8px 0;">' +
+      '💳 Complete Payment — ' + price + '/mo →</a><br><br>' +
+      '<small style="color:#7a7a8c;">Bookmark this link. Robin will also follow up at <strong>' + email + '</strong> shortly.</small><br><br>' +
+      'Questions? Call or text <a href="tel:7174613210">(717) 461-3210</a>.'
+    );
+    btn.disabled = false;
+    btn.textContent = 'Send My Application →';
+  }
+
+  var emailjsAvailable = (typeof emailjs !== 'undefined');
+
+  if (emailjsAvailable && emailjsReady) {
     // ── Automated path: send payment link directly to customer ──
     var customerParams = {
       to_email:     email,
@@ -1038,41 +1053,35 @@ document.getElementById('subForm').addEventListener('submit', function(e) {
       submitted_at: new Date().toLocaleString()
     };
 
-    // Send customer email first, then Robin's notification
-    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CUSTOMER_TEMPLATE, customerParams)
-      .then(function() {
-        return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_NOTIFY_TEMPLATE, notifyParams);
-      })
-      .then(function() {
-        showSubMsg('success',
-          '🎉 Your payment link has been sent to <strong>' + email + '</strong>!<br><br>' +
-          'Check your inbox (and spam folder just in case) for an email from Harrisburg Content Co. ' +
-          'with your secure Stripe payment link for the <strong>' + plan + ' Plan</strong>.<br><br>' +
-          'Questions? Call or text <a href="tel:7174613210">(717) 461-3210</a>.'
-        );
-        btn.disabled = false;
-        btn.textContent = 'Send My Application →';
-        document.getElementById('subForm').reset();
-        document.getElementById('sub-plan-hidden').value = plan;
-        document.getElementById('sub-price-hidden').value = price;
-      })
-      .catch(function(err) {
-        console.error('EmailJS error:', err);
-        // Fallback: show payment link on screen if email fails
-        showSubMsg('success',
-          '✅ Application received!<br><br>' +
-          'Here is your secure payment link for the <strong>' + plan + ' Plan</strong>:<br><br>' +
-          '<a href="' + paymentLink + '" target="_blank" rel="noopener noreferrer" ' +
-          'style="display:inline-block;background:#e05c2f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin:8px 0;">' +
-          '💳 Complete Payment →</a><br><br>' +
-          'Questions? Call or text <a href="tel:7174613210">(717) 461-3210</a>.'
-        );
-        btn.disabled = false;
-        btn.textContent = 'Send My Application →';
-      });
+    try {
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CUSTOMER_TEMPLATE, customerParams)
+        .then(function() {
+          return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_NOTIFY_TEMPLATE, notifyParams);
+        })
+        .then(function() {
+          showSubMsg('success',
+            '🎉 Your payment link has been sent to <strong>' + email + '</strong>!<br><br>' +
+            'Check your inbox (and spam folder just in case) for an email from Harrisburg Content Co. ' +
+            'with your secure Stripe payment link for the <strong>' + plan + ' Plan</strong>.<br><br>' +
+            'Questions? Call or text <a href="tel:7174613210">(717) 461-3210</a>.'
+          );
+          btn.disabled = false;
+          btn.textContent = 'Send My Application →';
+          document.getElementById('subForm').reset();
+          document.getElementById('sub-plan-hidden').value = plan;
+          document.getElementById('sub-price-hidden').value = price;
+        })
+        .catch(function(err) {
+          console.error('EmailJS send error:', err);
+          showPaymentFallback();
+        });
+    } catch(e) {
+      console.error('EmailJS exception:', e);
+      showPaymentFallback();
+    }
 
   } else {
-    // ── Fallback path (EmailJS not yet configured): show link on screen + notify Robin ──
+    // ── Fallback: show payment link on screen + open Robin's email ──
     var subjectLine = encodeURIComponent('NEW APPLICATION — ' + biz + ' (' + plan + ' Plan)');
     var emailBody = encodeURIComponent(
       'NEW SUBSCRIPTION APPLICATION\n\n' +
@@ -1083,21 +1092,8 @@ document.getElementById('subForm').addEventListener('submit', function(e) {
       '\n\nPayment link to send them:\n' + paymentLink +
       '\n\nSubmitted: ' + new Date().toLocaleString()
     );
-    window.open('mailto:dhital.robin33@gmail.com?subject=' + subjectLine + '&body=' + emailBody);
-
-    setTimeout(function() {
-      showSubMsg('success',
-        '✅ Application received! Here is your secure payment link for the <strong>' + plan + ' Plan</strong>:<br><br>' +
-        '<a href="' + paymentLink + '" target="_blank" rel="noopener noreferrer" ' +
-        'style="display:inline-block;background:#e05c2f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin:8px 0;">' +
-        '💳 Complete Payment — ' + price + '/mo →</a><br><br>' +
-        '<small style="color:#7a7a8c;">Save or bookmark this link. Robin will also follow up at <strong>' + email + '</strong>.</small><br><br>' +
-        'Questions? Call or text <a href="tel:7174613210">(717) 461-3210</a>.'
-      );
-      btn.disabled = false;
-      btn.textContent = 'Send My Application →';
-      document.getElementById('subForm').reset();
-    }, 800);
+    try { window.open('mailto:dhital.robin33@gmail.com?subject=' + subjectLine + '&body=' + emailBody); } catch(e) {}
+    setTimeout(showPaymentFallback, 600);
   }
 });
 
