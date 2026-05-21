@@ -257,12 +257,16 @@ document.getElementById('subForm').addEventListener('submit', function(e) {
           document.getElementById('sub-price-hidden').value = price;
         })
         .catch(function(err) {
-          console.error('EmailJS send error:', err);
-          showPaymentFallback();
+          var errMsg = (err && (err.text || err.message || JSON.stringify(err))) || 'Unknown error';
+          showSubMsg('error', '⚠️ Email failed to send. Error: <strong>' + escHtml(errMsg) + '</strong><br><br>Please screenshot this and send to Robin at (717) 461-3210.');
+          btn.disabled = false;
+          btn.textContent = 'Send My Application →';
         });
     } catch(e) {
-      console.error('EmailJS exception:', e);
-      showPaymentFallback();
+      var errMsg = (e && e.message) || String(e);
+      showSubMsg('error', '⚠️ EmailJS exception: <strong>' + escHtml(errMsg) + '</strong><br><br>Please screenshot this and send to Robin at (717) 461-3210.');
+      btn.disabled = false;
+      btn.textContent = 'Send My Application →';
     }
 
   } else {
