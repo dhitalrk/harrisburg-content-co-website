@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HCC Command Center — Harrisburg Content Co.</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Segoe UI',sans-serif;background:#f5f6fa;color:#1a1a2e;display:flex;min-height:100vh;}
+:root{
+  --coral:#e05c2f;--coral-dark:#c04a22;--coral-light:#fff3ef;
+  --navy:#1a1a2e;--gray:#f5f6fa;--muted:#7a7a8c;--white:#fff;
+  --green:#0a7c4b;--green-light:#e0f5ed;--red:#c0392b;--red-light:#fde8e8;
+  --yellow:#b8860b;--yellow-light:#fff8e1;--sw:220px;
+}
+/* SIDEBAR */
+#hcc-sb{width:var(--sw);min-height:100vh;background:var(--navy);position:fixed;left:0;top:0;bottom:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto;}
+.sb-logo{padding:18px 14px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo-text{font-size:13px;font-weight:800;color:#fff;line-height:1.3;}
+.sb-logo-text span{color:var(--coral);}
+.sb-logo-sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:3px;}
+.sb-nav{padding:10px 8px;flex:1;}
+.sb-cat{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.3);padding:10px 8px 5px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;cursor:pointer;transition:all .18s;color:rgba(255,255,255,.5);font-size:13px;font-weight:600;margin-bottom:2px;}
+.sb-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+.sb-item.active{background:var(--coral);color:#fff;}
+.sb-icon{font-size:15px;flex-shrink:0;width:20px;text-align:center;}
+.sb-foot{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);font-size:10px;color:rgba(255,255,255,.25);}
+/* MAIN */
+#hcc-main{margin-left:var(--sw);flex:1;min-height:100vh;}
+.hcc-sec{display:none;min-height:100vh;}
+.hcc-sec.active{display:block;}
+/* SECTION HEADER */
+.sec-hdr{background:var(--navy);padding:14px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.sec-hdr-title{color:#fff;font-size:16px;font-weight:800;}
+.sec-hdr-title span{color:var(--coral);}
+.sec-hdr-actions{display:flex;gap:7px;flex-wrap:wrap;}
+/* SHARED BUTTONS */
+.hb{padding:7px 16px;border-radius:18px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .2s;font-family:inherit;}
+.hb-coral{background:var(--coral);color:#fff;}
+.hb-coral:hover{background:var(--coral-dark);}
+.hb-outline{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.3);}
+.hb-outline:hover{border-color:var(--coral);color:var(--coral);}
+.hb-green{background:var(--green);color:#fff;}
+.hb-green:hover{background:#065c38;}
+.hb-ghost{background:rgba(255,255,255,.1);color:#fff;border:2px solid rgba(255,255,255,.2);}
+.hb-ghost:hover{border-color:var(--coral);color:var(--coral);}
+/* SHARED OVERLAY+MODAL */
+.hcc-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;align-items:center;justify-content:center;padding:20px;}
+.hcc-overlay.open{display:flex;}
+.hcc-modal{background:#fff;border-radius:16px;padding:26px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.hcc-modal h2{font-size:17px;font-weight:800;color:var(--navy);margin-bottom:16px;}
+.hcc-mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:500px){.hcc-mgrid{grid-template-columns:1fr;}}
+.hcc-fg{display:flex;flex-direction:column;gap:4px;}
+.hcc-fg.full{grid-column:1/-1;}
+.hcc-fg label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--navy);}
+.hcc-fg input,.hcc-fg select,.hcc-fg textarea{padding:8px 11px;border:2px solid #e0e0ea;border-radius:8px;font-size:13px;font-family:inherit;color:var(--navy);background:var(--gray);outline:none;transition:border-color .2s;}
+.hcc-fg input:focus,.hcc-fg select:focus,.hcc-fg textarea:focus{border-color:var(--coral);background:#fff;}
+.hcc-fg textarea{resize:vertical;min-height:66px;}
+.hcc-mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap;}
+/* SHARED TOAST */
+.hcc-toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:3000;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.hcc-toast.show{transform:translateY(0);opacity:1;}
+.hcc-toast.green{background:var(--green);}
+.hcc-toast.red{background:var(--red);}
+
+/* ── DASHBOARD ── */
+#sec-dash .d-body{padding:24px;}
+.d-welcome{background:linear-gradient(135deg,var(--navy) 55%,#2a1a4a 100%);border-radius:14px;padding:24px 28px;margin-bottom:22px;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.d-welcome h2{font-size:20px;font-weight:900;margin-bottom:5px;}
+.d-welcome h2 span{color:var(--coral);}
+.d-welcome p{color:rgba(255,255,255,.6);font-size:13px;line-height:1.6;}
+.d-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px;margin-bottom:24px;}
+.d-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.06);border-left:4px solid var(--coral);}
+.d-card.g{border-color:var(--green);}
+.d-card.b{border-color:#635bff;}
+.d-card.y{border-color:var(--yellow);}
+.d-val{font-size:26px;font-weight:900;color:var(--coral);}
+.d-card.g .d-val{color:var(--green);}
+.d-card.b .d-val{color:#635bff;}
+.d-card.y .d-val{color:var(--yellow);}
+.d-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px;}
+.d-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.d-nav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+.d-nav-btn{background:#fff;border:2px solid #e8e8f0;border-radius:12px;padding:16px;cursor:pointer;text-align:center;transition:all .2s;font-family:inherit;}
+.d-nav-btn:hover{border-color:var(--coral);transform:translateY(-2px);box-shadow:0 4px 16px rgba(224,92,47,.15);}
+.d-nav-icon{font-size:26px;margin-bottom:7px;}
+.d-nav-label{font-size:12px;font-weight:700;color:var(--navy);}
+.d-nav-desc{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* ── OUTREACH ── */
+#sec-out .out-body{padding:22px 26px;}
+.out-legend{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;}
+.out-bdg{padding:4px 13px;border-radius:18px;font-size:11px;font-weight:600;}
+.out-bdg.ig{background:#f5e0f7;color:#9b27af;}
+.out-bdg.fb{background:#e0eaff;color:#1877f2;}
+.out-bdg.em{background:#e0f5ed;color:#0a7c4b;}
+.out-stitle{font-size:15px;font-weight:700;margin:22px 0 12px;padding-left:9px;border-left:4px solid var(--coral);color:var(--navy);display:flex;align-items:center;gap:9px;}
+.out-card{background:#fff;border-radius:12px;padding:18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.out-card-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.out-num{background:var(--coral);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.out-msg-title{font-weight:700;font-size:13px;}
+.out-target{font-size:11px;color:var(--muted);margin-top:1px;}
+.out-msgbox{background:#f9f9fb;border:1px solid #e8e8f0;border-radius:8px;padding:13px 15px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:#333;position:relative;}
+.out-cbtn{position:absolute;top:8px;right:8px;background:var(--coral);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;}
+.out-cbtn:hover{background:var(--coral-dark);}
+.out-cbtn.copied{background:var(--green);}
+.out-tip{margin-top:7px;font-size:11px;color:var(--muted);font-style:italic;}
+.out-notebox{background:var(--yellow-light);border:1px solid #ffe082;border-radius:10px;padding:14px 18px;margin-top:20px;font-size:12px;line-height:1.7;color:#5a4000;}
+.out-notebox h3{margin-bottom:7px;font-size:13px;color:var(--yellow);}
+
+/* ── DEMO ── */
+#sec-demo{background:#0D0D1A;}
+#sec-demo .sec-hdr{background:linear-gradient(135deg,#6C47FF,#9B59B6);}
+.dm-hero{text-align:center;padding:36px 22px 24px;background:radial-gradient(ellipse at 50% 0%,rgba(108,71,255,.15) 0%,transparent 70%);}
+.dm-hlabel{display:inline-block;background:rgba(108,71,255,.15);border:1px solid rgba(108,71,255,.25);color:#A78BFA;padding:4px 14px;border-radius:18px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;}
+.dm-hero h2{font-size:clamp(1.5rem,3.5vw,2.5rem);font-weight:900;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,#fff 40%,#A78BFA 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.dm-hero p{color:#8888AA;font-size:.95rem;max-width:500px;margin:0 auto 20px;line-height:1.6;}
+.dm-sel{padding:0 22px 28px;max-width:820px;margin:0 auto;}
+.dm-sel-lbl{text-align:center;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#8888AA;margin-bottom:10px;}
+.dm-biz-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.dm-biz-btn{background:#16162A;border:2px solid rgba(108,71,255,.25);color:#8888AA;padding:8px 16px;border-radius:36px;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:7px;}
+.dm-biz-btn:hover{border-color:#6C47FF;color:#E8E8F0;}
+.dm-biz-btn.active{background:#6C47FF;border-color:#6C47FF;color:#fff;box-shadow:0 0 18px rgba(108,71,255,.5);}
+.dm-tabs{display:flex;justify-content:center;gap:8px;padding:0 22px 28px;flex-wrap:wrap;}
+.dm-tbtn{background:#16162A;border:2px solid rgba(108,71,255,.25);color:#8888AA;padding:9px 22px;border-radius:10px;cursor:pointer;font-size:.88rem;font-weight:700;transition:all .2s;}
+.dm-tbtn:hover{border-color:#6C47FF;color:#E8E8F0;}
+.dm-tbtn.active{background:linear-gradient(135deg,#6C47FF,#9B59B6);border-color:transparent;color:#fff;box-shadow:0 4px 18px rgba(108,71,255,.4);}
+.dm-panel{display:none;padding:0 22px 44px;max-width:1020px;margin:0 auto;}
+.dm-panel.active{display:block;}
+.dm-stitle{font-size:1.4rem;font-weight:900;margin-bottom:5px;text-align:center;color:#E8E8F0;}
+.dm-ssub{text-align:center;color:#8888AA;margin-bottom:24px;font-size:.88rem;}
+.dm-posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:18px;}
+.dm-post-card{background:#16162A;border:1px solid rgba(108,71,255,.25);border-radius:13px;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.dm-post-card:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(108,71,255,.2);}
+.dm-post-img{width:100%;height:170px;display:flex;align-items:center;justify-content:center;font-size:3.8rem;background:linear-gradient(135deg,#1a1a35,#2a1a4a);}
+.dm-post-plat{padding:10px 13px 0;display:flex;align-items:center;gap:7px;}
+.dm-pi{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;}
+.dm-pi-ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;}
+.dm-pi-fb{background:#1877F2;color:#fff;}
+.dm-pi-g{background:#fff;color:#333;}
+.dm-plat-name{font-size:.72rem;font-weight:700;color:#8888AA;}
+.dm-post-body{padding:9px 13px 13px;}
+.dm-post-cap{font-size:.82rem;line-height:1.55;color:#E8E8F0;margin-bottom:9px;}
+.dm-post-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:9px;}
+.dm-post-tag{font-size:.7rem;color:#A78BFA;font-weight:600;}
+.dm-post-stats{display:flex;gap:12px;border-top:1px solid rgba(255,255,255,.06);padding-top:7px;}
+.dm-post-stat{font-size:.75rem;color:#8888AA;}
+.dm-post-stat strong{color:#E8E8F0;}
+.dm-ba-pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;align-items:stretch;}
+@media(max-width:620px){.dm-ba-pair{grid-template-columns:1fr;}}
+.dm-ba-card{background:#16162A;border-radius:13px;overflow:hidden;border:2px solid;}
+.dm-ba-card.dm-bef{border-color:rgba(239,68,68,.4);}
+.dm-ba-card.dm-aft{border-color:rgba(34,197,94,.4);}
+.dm-ba-hdr{padding:9px 13px;font-size:.76rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:7px;}
+.dm-ba-card.dm-bef .dm-ba-hdr{background:rgba(239,68,68,.15);color:#F87171;}
+.dm-ba-card.dm-aft .dm-ba-hdr{background:rgba(34,197,94,.15);color:#4ADE80;}
+.dm-ba-content{padding:13px;}
+.dm-ba-img{width:100%;height:130px;display:flex;align-items:center;justify-content:center;font-size:3.2rem;margin-bottom:9px;border-radius:8px;}
+.dm-ba-card.dm-bef .dm-ba-img{background:#1a1015;}
+.dm-ba-card.dm-aft .dm-ba-img{background:#0a1a15;}
+.dm-ba-cap{font-size:.8rem;line-height:1.5;color:#E8E8F0;margin-bottom:9px;}
+.dm-ba-metrics{display:flex;gap:8px;flex-wrap:wrap;}
+.dm-ba-metric{background:#1E1E35;border-radius:6px;padding:4px 9px;font-size:.72rem;font-weight:700;}
+.dm-ba-card.dm-bef .dm-ba-metric{color:#F87171;}
+.dm-ba-card.dm-aft .dm-ba-metric{color:#4ADE80;}
+.dm-stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:28px;}
+.dm-stat-card{background:#16162A;border:1px solid rgba(108,71,255,.25);border-radius:13px;padding:18px;text-align:center;position:relative;overflow:hidden;}
+.dm-stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.dm-stat-card.purple::before{background:linear-gradient(90deg,#6C47FF,#9B59B6);}
+.dm-stat-card.green::before{background:linear-gradient(90deg,#22C55E,#16A34A);}
+.dm-stat-card.blue::before{background:linear-gradient(90deg,#3B82F6,#2563EB);}
+.dm-stat-card.orange::before{background:linear-gradient(90deg,#F59E0B,#D97706);}
+.dm-stat-icon{font-size:1.7rem;margin-bottom:7px;}
+.dm-stat-val{font-size:2rem;font-weight:900;line-height:1;margin-bottom:5px;}
+.dm-stat-card.purple .dm-stat-val{color:#A78BFA;}
+.dm-stat-card.green .dm-stat-val{color:#4ADE80;}
+.dm-stat-card.blue .dm-stat-val{color:#60A5FA;}
+.dm-stat-card.orange .dm-stat-val{color:#FCD34D;}
+.dm-stat-lbl{font-size:.78rem;color:#8888AA;font-weight:600;}
+.dm-stat-chg{display:inline-block;margin-top:6px;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:14px;background:rgba(34,197,94,.15);color:#4ADE80;}
+.dm-chart-card{background:#16162A;border:1px solid rgba(108,71,255,.25);border-radius:13px;padding:22px;margin-bottom:18px;}
+.dm-chart-title{font-size:.95rem;font-weight:800;margin-bottom:3px;color:#E8E8F0;}
+.dm-chart-sub{font-size:.76rem;color:#8888AA;margin-bottom:18px;}
+.dm-chart-bars{display:flex;align-items:flex-end;gap:7px;height:130px;}
+.dm-chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
+.dm-chart-bar{width:100%;border-radius:4px 4px 0 0;min-height:4px;cursor:pointer;}
+.dm-chart-bar:hover{opacity:.85;}
+.dm-bar-val{font-size:.64rem;font-weight:700;color:#E8E8F0;}
+.dm-bar-lbl{font-size:.62rem;color:#8888AA;text-align:center;white-space:nowrap;}
+.dm-hcc-bar{background:linear-gradient(180deg,#A78BFA,#6C47FF);}
+.dm-bef-bar{background:linear-gradient(180deg,#6b6b80,#3a3a50);}
+.dm-chart-legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;}
+.dm-legend-item{display:flex;align-items:center;gap:6px;font-size:.74rem;color:#8888AA;}
+.dm-legend-dot{width:10px;height:10px;border-radius:3px;}
+.dm-cta{background:linear-gradient(135deg,rgba(108,71,255,.2),rgba(155,89,182,.15));border:1px solid rgba(108,71,255,.25);border-radius:14px;padding:28px;text-align:center;margin-top:14px;}
+.dm-cta h3{font-size:1.4rem;font-weight:900;margin-bottom:7px;color:#E8E8F0;}
+.dm-cta p{color:#8888AA;margin-bottom:18px;font-size:.88rem;}
+.dm-cta-btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;}
+.dm-cta-btn{padding:11px 24px;border-radius:9px;font-size:.88rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+.dm-cta-pri{background:linear-gradient(135deg,#6C47FF,#9B59B6);color:#fff;box-shadow:0 4px 18px rgba(108,71,255,.4);}
+.dm-cta-pri:hover{transform:translateY(-2px);}
+.dm-cta-sec{background:#16162A;border:2px solid rgba(108,71,255,.25);color:#E8E8F0;}
+.dm-cta-sec:hover{border-color:#6C47FF;}
+
+/* ── ONBOARDING ── */
+#sec-ob .ob-body{padding:22px 26px;}
+.ob-tabs{display:flex;gap:9px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;}
+.ob-tbtn{padding:8px 18px;border-radius:28px;border:2px solid var(--coral);background:#fff;color:var(--coral);font-weight:700;font-size:12px;cursor:pointer;transition:all .2s;font-family:inherit;}
+.ob-tbtn.active{background:var(--coral);color:#fff;}
+.ob-tc{display:none;}
+.ob-tc.active{display:block;}
+.ob-card{background:#fff;border-radius:12px;padding:22px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.ob-card h2{font-size:15px;color:var(--coral);margin-bottom:14px;padding-bottom:7px;border-bottom:2px solid #fce8e0;font-weight:800;}
+.ob-field{margin-bottom:16px;}
+.ob-field label{font-weight:700;font-size:12px;color:var(--navy);margin-bottom:4px;display:block;}
+.ob-field label span{font-weight:400;color:var(--muted);font-size:10px;margin-left:4px;}
+.ob-input{width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:13px;color:#333;background:#fafafa;outline:none;transition:border-color .2s;font-family:inherit;}
+.ob-input:focus{border-color:var(--coral);background:#fff;}
+textarea.ob-input{resize:vertical;min-height:68px;}
+.ob-cg{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px;}
+.ob-ci{display:flex;align-items:center;gap:5px;background:#f5f6fa;border:1.5px solid #ddd;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;transition:all .15s;}
+.ob-ci:hover{border-color:var(--coral);}
+.ob-email-box{background:#f9f9fb;border:1px solid #e0e0ea;border-radius:10px;padding:18px;font-size:13px;line-height:1.8;white-space:pre-wrap;color:#333;position:relative;}
+.ob-cbtn{position:absolute;top:9px;right:9px;background:var(--coral);color:#fff;border:none;border-radius:6px;padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;}
+.ob-cbtn:hover{background:var(--coral-dark);}
+.ob-cbtn.copied{background:var(--green);}
+.ob-steps{list-style:none;}
+.ob-steps li{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f0f0f5;font-size:13px;line-height:1.6;}
+.ob-steps li:last-child{border-bottom:none;}
+.ob-snum{background:var(--coral);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;}
+.ob-hl{background:var(--yellow-light);border:1px solid #ffe082;border-radius:9px;padding:13px 16px;margin-top:14px;font-size:12px;color:#5a4000;line-height:1.7;}
+
+/* ── WORKFLOW ── */
+#sec-wf .wf-body{padding:22px 26px;}
+.wf-sec{margin-bottom:28px;}
+.wf-stitle{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:12px;padding-left:9px;border-left:4px solid var(--coral);}
+.wf-card{background:#fff;border-radius:12px;padding:18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.wf-card h3{font-size:13px;color:var(--coral);margin-bottom:10px;font-weight:700;}
+.wf-prompt{background:var(--navy);color:#f0f0f0;border-radius:8px;padding:14px 16px;font-size:12px;line-height:1.7;white-space:pre-wrap;position:relative;font-family:'Courier New',monospace;}
+.wf-cbtn{position:absolute;top:7px;right:7px;background:var(--coral);color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:10px;font-weight:600;cursor:pointer;}
+.wf-cbtn.copied{background:var(--green);}
+.wf-var{color:#ffcc80;font-weight:700;}
+.wf-twrap{overflow-x:auto;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+#sec-wf table{width:100%;border-collapse:collapse;font-size:13px;}
+#sec-wf thead th{background:var(--coral);color:#fff;padding:9px 13px;text-align:left;}
+#sec-wf tbody td{padding:8px 13px;border-bottom:1px solid #f0f0f5;}
+#sec-wf tbody tr:last-child td{border-bottom:none;}
+#sec-wf tbody tr:nth-child(even) td{background:#fafafa;}
+.wf-tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+.wf-tier-card{border:2px solid var(--coral);border-radius:11px;padding:14px;background:#fff;}
+.wf-tier-card h4{color:var(--coral);font-size:13px;margin-bottom:7px;font-weight:800;}
+.wf-tier-card ul{list-style:none;font-size:12px;line-height:1.8;color:#444;}
+.wf-tier-card ul li::before{content:"✓ ";color:var(--coral);font-weight:700;}
+.wf-checklist{list-style:none;}
+.wf-checklist li{display:flex;align-items:flex-start;gap:7px;padding:7px 0;border-bottom:1px solid #f0f0f5;font-size:13px;line-height:1.5;}
+.wf-checklist li:last-child{border-bottom:none;}
+.wf-checklist input{margin-top:2px;flex-shrink:0;cursor:pointer;}
+.wf-hl{background:var(--yellow-light);border:1px solid #ffe082;border-radius:8px;padding:12px 15px;margin-top:12px;font-size:12px;color:#5a4000;line-height:1.7;}
+
+/* ── REFUNDS ── */
+#sec-rf .rf-stats{background:#fff;border-bottom:1px solid #e8e8f0;padding:12px 26px;display:flex;gap:24px;flex-wrap:wrap;}
+#sec-rf .rf-stat-item{text-align:center;}
+#sec-rf .rf-stat-val{font-size:20px;font-weight:900;color:var(--coral);}
+#sec-rf .rf-stat-lbl{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+#sec-rf .rf-toolbar{padding:12px 26px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;background:#fff;border-bottom:1px solid #f0f0f5;}
+#sec-rf .rf-filter,.rf-search{padding:7px 11px;border:2px solid #e0e0ea;border-radius:8px;font-size:12px;font-family:inherit;color:var(--navy);background:var(--gray);outline:none;transition:border-color .2s;}
+#sec-rf .rf-filter:focus,#sec-rf .rf-search:focus{border-color:var(--coral);}
+#sec-rf .rf-search{min-width:190px;}
+#sec-rf .rf-twrap{padding:16px 26px;overflow-x:auto;}
+#sec-rf table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);font-size:13px;}
+#sec-rf thead{background:var(--navy);}
+#sec-rf thead th{color:#fff;padding:9px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+#sec-rf tbody tr{border-bottom:1px solid #f0f0f5;transition:background .15s;}
+#sec-rf tbody tr:last-child{border-bottom:none;}
+#sec-rf tbody tr:hover{background:#fafafa;}
+#sec-rf tbody td{padding:9px 12px;vertical-align:middle;}
+.rf-tdn{font-weight:700;color:var(--navy);}
+.rf-tdb{font-size:10px;color:var(--muted);margin-top:1px;}
+.rf-bdg{padding:3px 9px;border-radius:9px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+.rf-bdg-pend{background:#fff3cd;color:#856404;}
+.rf-bdg-proc{background:#d1ecf1;color:#0c5460;}
+.rf-bdg-comp{background:#d4edda;color:#155724;}
+.rf-bdg-deny{background:#f8d7da;color:#721c24;}
+.rf-amt{font-weight:800;color:var(--coral);font-size:13px;}
+.rf-abtn{padding:3px 9px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .2s;}
+.rf-edit{background:#e8e8f5;color:var(--navy);}
+.rf-edit:hover{background:var(--navy);color:#fff;}
+.rf-del{background:var(--red-light);color:var(--red);}
+.rf-del:hover{background:var(--red);color:#fff;}
+.rf-stripe{background:#635bff;color:#fff;}
+.rf-stripe:hover{background:#4a42e8;}
+.rf-empty{text-align:center;padding:48px 20px;color:var(--muted);}
+.rf-empty-ico{font-size:40px;margin-bottom:10px;}
+.rf-empty h3{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:5px;}
+
+/* ── TAX ── */
+#sec-tx .tx-subhdr{background:var(--navy);padding:10px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;border-top:1px solid rgba(255,255,255,.08);}
+#sec-tx .tx-yrsel{background:rgba(255,255,255,.1);color:#fff;border:2px solid rgba(255,255,255,.2);padding:5px 12px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;outline:none;font-family:inherit;}
+#sec-tx .tx-hbtns{display:flex;gap:6px;flex-wrap:wrap;}
+#sec-tx .tx-tabs{background:#fff;border-bottom:2px solid #e8e8f0;padding:0 26px;display:flex;gap:0;overflow-x:auto;}
+#sec-tx .tx-tab{padding:11px 16px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;white-space:nowrap;}
+#sec-tx .tx-tab.active{color:var(--coral);border-bottom-color:var(--coral);}
+#sec-tx .tx-tab:hover{color:var(--coral);}
+#sec-tx .tx-panel{display:none;padding:20px 26px;}
+#sec-tx .tx-panel.active{display:block;}
+#sec-tx .tx-sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px;}
+#sec-tx .tx-scard{background:#fff;border-radius:11px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.06);border-left:4px solid transparent;}
+#sec-tx .tx-scard.inc{border-color:var(--green);}
+#sec-tx .tx-scard.exp{border-color:var(--coral);}
+#sec-tx .tx-scard.prf{border-color:#635bff;}
+#sec-tx .tx-scard.tax{border-color:var(--yellow);}
+#sec-tx .tx-slbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:5px;}
+#sec-tx .tx-sval{font-size:20px;font-weight:900;}
+#sec-tx .tx-scard.inc .tx-sval{color:var(--green);}
+#sec-tx .tx-scard.exp .tx-sval{color:var(--coral);}
+#sec-tx .tx-scard.prf .tx-sval{color:#635bff;}
+#sec-tx .tx-scard.tax .tx-sval{color:var(--yellow);}
+#sec-tx .tx-ssub{font-size:10px;color:var(--muted);margin-top:3px;}
+#sec-tx .tx-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;}
+#sec-tx .tx-tsel,.tx-tinput{padding:7px 10px;border:2px solid #e0e0ea;border-radius:8px;font-size:12px;font-family:inherit;color:var(--navy);background:var(--gray);outline:none;transition:border-color .2s;}
+#sec-tx .tx-tsel:focus,.tx-tinput:focus{border-color:var(--coral);}
+#sec-tx .tx-twrap{background:#fff;border-radius:11px;box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden;overflow-x:auto;}
+#sec-tx table{width:100%;border-collapse:collapse;font-size:12px;}
+#sec-tx thead th{background:var(--navy);color:#fff;padding:9px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+#sec-tx tbody tr{border-bottom:1px solid #f0f0f5;transition:background .15s;}
+#sec-tx tbody tr:last-child{border-bottom:none;}
+#sec-tx tbody tr:hover{background:#fafafa;}
+#sec-tx tbody td{padding:9px 11px;vertical-align:middle;}
+#sec-tx .tx-erow td{text-align:center;color:var(--muted);padding:32px;font-style:italic;}
+.tx-cbdg{padding:2px 8px;border-radius:7px;font-size:9px;font-weight:700;}
+.tx-inc-bdg{background:var(--green-light);color:var(--green);}
+.tx-exp-bdg{background:var(--coral-light);color:var(--coral);}
+.tx-ded-bdg{background:#e8e8ff;color:#635bff;}
+.tx-abtn{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .2s;margin-right:3px;}
+.tx-aedit{background:#e8e8f5;color:var(--navy);}
+.tx-aedit:hover{background:var(--navy);color:#fff;}
+.tx-adel{background:var(--red-light);color:var(--red);}
+.tx-adel:hover{background:var(--red);color:#fff;}
+#sec-tx .tx-q-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
+#sec-tx .tx-qcard{background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+#sec-tx .tx-qtitle{font-size:10px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+#sec-tx .tx-qdates{font-size:10px;color:var(--muted);margin-bottom:8px;}
+#sec-tx .tx-qdue{font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;display:inline-block;margin-bottom:7px;}
+#sec-tx .tx-qdue.upcoming{background:#fff3cd;color:#856404;}
+#sec-tx .tx-qdue.paid{background:var(--green-light);color:var(--green);}
+#sec-tx .tx-qamt{font-size:18px;font-weight:900;color:var(--navy);}
+#sec-tx .tx-qsub{font-size:10px;color:var(--muted);margin-top:2px;}
+#sec-tx .tx-qpaidbtn{margin-top:8px;padding:4px 11px;font-size:10px;font-weight:700;border-radius:7px;cursor:pointer;border:none;font-family:inherit;transition:all .2s;}
+#sec-tx .tx-guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+#sec-tx .tx-gcard{background:#fff;border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+#sec-tx .tx-gcard h3{font-size:12px;font-weight:800;color:var(--navy);margin-bottom:9px;}
+#sec-tx .tx-gitem{padding:5px 0;border-bottom:1px solid #f0f0f5;font-size:12px;line-height:1.6;display:flex;gap:6px;}
+#sec-tx .tx-gitem:last-child{border-bottom:none;}
+#sec-tx .tx-gitem::before{content:"→";color:var(--coral);font-weight:700;flex-shrink:0;}
+#sec-tx .tx-alert{border-radius:8px;padding:11px 15px;font-size:12px;line-height:1.7;margin-bottom:14px;}
+#sec-tx .tx-alert-y{background:var(--yellow-light);border:1px solid #ffe082;color:#5a4000;}
+#sec-tx .tx-alert-g{background:var(--green-light);border:1px solid #a8dfc5;color:#0a4d2f;}
+/* RESPONSIVE */
+@media(max-width:760px){
+  :root{--sw:58px;}
+  .sb-logo-text,.sb-logo-sub,.sb-item>span:last-child,.sb-cat,.sb-foot{display:none;}
+  .sb-item{padding:9px;justify-content:center;}
+}
+</style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<nav id="hcc-sb">
+  <div class="sb-logo">
+    <div class="sb-logo-text">Harrisburg <span>Content Co.</span></div>
+    <div class="sb-logo-sub">Command Center</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-cat">Overview</div>
+    <div class="sb-item active" onclick="showSec('dash')"><span class="sb-icon">🏠</span><span>Dashboard</span></div>
+    <div class="sb-cat">Operations</div>
+    <div class="sb-item" onclick="showSec('out')"><span class="sb-icon">📣</span><span>Outreach</span></div>
+    <div class="sb-item" onclick="showSec('demo')"><span class="sb-icon">✨</span><span>Client Demo</span></div>
+    <div class="sb-item" onclick="showSec('ob')"><span class="sb-icon">📋</span><span>Onboarding</span></div>
+    <div class="sb-item" onclick="showSec('wf')"><span class="sb-icon">⚙️</span><span>Workflow</span></div>
+    <div class="sb-cat">Finance</div>
+    <div class="sb-item" onclick="showSec('rf')"><span class="sb-icon">↩️</span><span>Refunds</span></div>
+    <div class="sb-item" onclick="showSec('tx')"><span class="sb-icon">💰</span><span>Revenue & Tax</span></div>
+  </div>
+  <div class="sb-foot">Robin Dhital · HCC</div>
+</nav>
+
+<!-- MAIN -->
+<main id="hcc-main">
+
+<!-- ══ DASHBOARD ══ -->
+<div id="sec-dash" class="hcc-sec active">
+  <div class="sec-hdr">
+    <div class="sec-hdr-title">🏠 <span>Command</span> Center</div>
+    <div class="sec-hdr-actions">
+      <button class="hb hb-outline" onclick="window.open('https://dhitalrk.github.io/harrisburg-content-co-website/','_blank')">🌐 Live Website</button>
+      <button class="hb hb-coral" onclick="window.open('mailto:dhital.robin33@gmail.com','_blank')">📧 Email</button>
+    </div>
+  </div>
+  <div class="d-body">
+    <div class="d-welcome">
+      <div>
+        <h2>Welcome back, <span>Robin</span> 👋</h2>
+        <p>Harrisburg Content Co. — All your tools in one place.<br>Starter $497 · Growth $997 · Authority $1,997/mo</p>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:28px;font-weight:900;color:var(--coral);" id="dash-revenue">$0</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);">Revenue this year</div>
+      </div>
+    </div>
+    <div class="d-grid">
+      <div class="d-card"><div class="d-lbl">Total Revenue</div><div class="d-val" id="dash-rev2">$0</div><div class="d-sub">This year</div></div>
+      <div class="d-card g"><div class="d-lbl">Net Profit</div><div class="d-val" id="dash-profit">$0</div><div class="d-sub">After deductibles</div></div>
+      <div class="d-card b"><div class="d-lbl">Est. Tax</div><div class="d-val" id="dash-tax">$0</div><div class="d-sub">Federal + SE + PA</div></div>
+      <div class="d-card y"><div class="d-lbl">Refunds</div><div class="d-val" id="dash-refunds">0</div><div class="d-sub">Total logged</div></div>
+    </div>
+    <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:12px;">Quick Navigation</div>
+    <div class="d-nav-grid">
+      <button class="d-nav-btn" onclick="showSec('out')"><div class="d-nav-icon">📣</div><div class="d-nav-label">Outreach</div><div class="d-nav-desc">10 ready-to-send messages</div></button>
+      <button class="d-nav-btn" onclick="showSec('demo')"><div class="d-nav-icon">✨</div><div class="d-nav-label">Client Demo</div><div class="d-nav-desc">6 business types, live preview</div></button>
+      <button class="d-nav-btn" onclick="showSec('ob')"><div class="d-nav-icon">📋</div><div class="d-nav-label">Onboarding</div><div class="d-nav-desc">Intake form, welcome email</div></button>
+      <button class="d-nav-btn" onclick="showSec('wf')"><div class="d-nav-icon">⚙️</div><div class="d-nav-label">Workflow</div><div class="d-nav-desc">5 AI prompts, checklist</div></button>
+      <button class="d-nav-btn" onclick="showSec('rf')"><div class="d-nav-icon">↩️</div><div class="d-nav-label">Refund Tracker</div><div class="d-nav-desc">Log &amp; manage refunds</div></button>
+      <button class="d-nav-btn" onclick="showSec('tx')"><div class="d-nav-icon">💰</div><div class="d-nav-label">Revenue &amp; Tax</div><div class="d-nav-desc">Income, expenses, quarterly</div></button>
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:18px;margin-top:24px;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+      <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:10px;">📌 Quick Info</div>
+      <div style="font-size:13px;color:#555;line-height:1.8;">
+        <strong>Email:</strong> dhital.robin33@gmail.com &nbsp;·&nbsp; <strong>Phone:</strong> (717) 461-3210<br>
+        <strong>Website:</strong> harrisburgcontentco.com &nbsp;·&nbsp; <strong>7-day money-back guarantee</strong><br>
+        <strong>Plans:</strong> Starter $497 (12 posts) · Growth $997 (30 posts) · Authority $1,997 (60 posts)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OUTREACH ══ -->
+<div id="sec-out" class="hcc-sec">
+  <div class="sec-hdr">
+    <div class="sec-hdr-title">📣 <span>Outreach</span> Messages</div>
+  </div>
+  <div class="out-body">
+    <div class="out-legend">
+      <span class="out-bdg ig">📸 Instagram DM</span>
+      <span class="out-bdg fb">💬 Facebook DM</span>
+      <span class="out-bdg em">📧 Cold Email</span>
+    </div>
+    <div class="out-stitle">📸 Instagram DMs <span class="out-bdg ig">3 messages</span></div>
+    <div class="out-card"><div class="out-card-hdr"><div class="out-num">1</div><div><div class="out-msg-title">The Compliment + Curiosity Hook</div><div class="out-target">Best for: Restaurants with decent food photos already posting</div></div><span class="out-bdg ig" style="margin-left:auto;">Instagram DM</span></div><div class="out-msgbox" id="out-msg1">Hey [Restaurant Name] 👋 Love what you're putting out — those [dish name / "food shots"] look amazing.
+
+I help Harrisburg restaurants get consistent content on Instagram and Facebook every single month — without the owner having to think about it.
+
+12 posts, captions, hashtags, scheduled for you. Done.
+
+Would it be cool if I sent over a free sample post for your restaurant this week?
+
+— Robin, Harrisburg Content Co.<button class="out-cbtn" onclick="outCopy('out-msg1',this)">Copy</button></div><p class="out-tip">💡 Personalize [Restaurant Name] and mention a specific dish — takes 10 seconds and triples reply rate.</p></div>
+    <div class="out-card"><div class="out-card-hdr"><div class="out-num">2</div><div><div class="out-msg-title">The Local Angle</div><div class="out-target">Best for: Newer restaurants or ones posting inconsistently</div></div><span class="out-bdg ig" style="margin-left:auto;">Instagram DM</span></div><div class="out-msgbox" id="out-msg2">Hi [Owner/Restaurant Name] — I'm Robin, based right here in Harrisburg.
+
+I run a small content agency that helps local restaurants stay active on social media without it eating into your day.
+
+Noticed you haven't posted in a while — totally get it, running a restaurant is no joke.
+
+We do everything: captions, graphics, hashtags, scheduled posts. Starting at $497/month, and I'll do a free sample for you first so you can see exactly what you'd get.
+
+Interested?<button class="out-cbtn" onclick="outCopy('out-msg2',this)">Copy</button></div><p class="out-tip">💡 Works well when you can see their last post was 2+ weeks ago.</p></div>
+    <div class="out-card"><div class="out-card-hdr"><div class="out-num">3</div><div><div class="out-msg-title">The Direct ROI Angle</div><div class="out-target">Best for: Restaurants with a menu or event to promote</div></div><span class="out-bdg ig" style="margin-left:auto;">Instagram DM</span></div><div class="out-msgbox" id="out-msg3">Hey [Restaurant Name] 👋
+
+Quick question — are you currently running any social media for your specials / events / daily menu?
+
+I help Harrisburg restaurants get 12+ posts per month done-for-them — captions, graphics, hashtags, all scheduled. Owners just send me photos and I handle everything else.
+
+Most of my clients see more table reservations and DMs within the first 30 days.
+
+Happy to do one free post for you this week — no strings. Just reply here if you want it!<button class="out-cbtn" onclick="outCopy('out-msg3',this)">Copy</button></div><p class="out-tip">💡 The "free post" offer removes all risk and gets replies from curious owners.</p></div>
+
+    <div class="out-stitle">💬 Facebook DMs <span class="out-bdg fb">3 messages</span></div>
+    <div class="out-card"><div class="out-card-hdr"><div class="out-num">4</div><div><div class="out-msg-title">The Friendly Local Intro</div><div class="out-target">Best for: Restaurant Facebook pages with an active owner</div></div><span class="out-bdg fb" style="margin-left:auto;">Facebook DM</span></div><div class="out-msgbox" id="out-msg4">Hi [Owner Name / Restaurant Name],
+
+My name is Robin Dhital — I'm a Harrisburg-based content creator and I run Harrisburg Content Co., a small agency that helps local restaurants grow on social media.
+
+I came across your page and really enjoyed [something specific — e.g., "your lunch special posts"]. You've got a great story to tell.
+
+I wanted to reach out because I specialize in creating done-for-you monthly social media content for restaurants — 12 posts per month including captions, branded graphics, and scheduled posting.
+
+I'd love to create one free sample post for [Restaurant Name] this week so you can see the quality before committing to anything.
+
+Would that be okay?
+
+— Robin
+Harrisburg Content Co.
+dhital.robin33@gmail.com<button class="out-cbtn" onclick="outCopy('out-msg4',this)">Copy</button></div><p class="out-tip">💡 Facebook owners respond better to slightly longer, professional messages. Include your email.</p></div>
+    <div class="out-card"><div class="out-card-hdr"><div class="out-num">5</div><div><div class="out-msg-title">The Problem + Solution</div><div class="out-target">Best for: Restaurants posting randomly or not at all</div></div><span class="out-bdg fb" style="margin-left:auto;">Facebook DM</span></div><div class="out-msgbox" id="out-msg5">Hi there,
+
+I know running a restaurant in Harrisburg means social media is always the last thing on your list — there's always something more urgent in the kitchen or with staff.
+
+That's exactly why I started Harrisburg Content Co. I handle everything: writing the captions, making the graphics, picking the hashtags, and scheduling every post so your page stays active and visible — without you lifting a finger.
+
+We start at $497/month for 12 fully done-for-you posts per month. Before you decide anything, I'll create a free custom post for your restaurant so you can see the quality first.
+
+No commitment, no pitch call required. Just a free post.
+
+Interested? Reply here or email me at dhital.robin33@gmail.com.
+
+— Robin Dhital, Harrisburg Content Co.<button class="out-cbtn" onclick="outCopy('out-msg5',this)">Copy</button></div><p class="out-tip">💡 Lead with empathy about their real pain (time), not your service features.</p></div>
+    <div class="out-card"><div class="out-card-hdr"><div class="out-num">6</div><div><div class="out-msg-title">The "Fellow Local" Angle</div><div class="out-target">Best for: Ethnic restaurants, family-owned spots</div></div><span class="out-bdg fb" style="margin-left:auto;">Facebook DM</span></div><div class="out-msgbox" id="out-msg6">Hi [Restaurant Name] team,
+
+I'm Robin — I live right here in Harrisburg and I genuinely love supporting local businesses in our community.
+
+I started a content agency specifically for Harrisburg small businesses because I noticed so many great local spots have amazing food and stories but don't have time to show it online.
+
+I'd love to help [Restaurant Name] get more visibility on Facebook and Instagram. I create all the content — captions, graphics, everything — and schedule it for you every month.
+
+I'll do one completely free post for you this week to show you what it looks like. No cost, no obligation.
+
+Would you be open to it?
+
+— Robin
+Harrisburg Content Co.
+harrisburgcontentco.com<button class="out-cbtn" onclick="outCopy('out-msg6',this)">Copy</button></div><p class="out-tip">💡 The community/local angle builds instant trust with immigrant-owned or family-run restaurants.</p></div>
+
+    <div class="out-stitle">📧 Cold Emails <span class="out-bdg em">4 messages</span></div>
+    <div class="out-card"><div class="out-card-hdr"><div class="out-num">7</div><div><div class="out-msg-title">The Short &amp; Direct Email</div><div class="out-target">Best for: First contact with any restaurant — highest open rate format</div></div><span class="out-bdg em" style="margin-left:auto;">Cold Email</span></div><div class="out-msgbox" id="out-msg7">Subject: Free social media post for [Restaurant Name]
+
+Hi [Owner Name],
+
+I'm Robin Dhital — I run Harrisburg Content Co., a local social media agency serving Harrisburg restaurants.
+
+I'd like to create one free Instagram/Facebook post for [Restaurant Name] this week — caption, graphic, hashtags — no strings attached.
+
+If you like it, we can talk about doing 12 of these per month ($497/month, fully done for you). If not, keep the post with my compliments.
+
+Interested? Just reply to this email.
+
+— Robin Dhital
+Harrisburg Content Co.
+dhital.robin33@gmail.com
+harrisburgcontentco.com<button class="out-cbtn" onclick="outCopy('out-msg7',this)">Copy</button></div><p class="out-tip">💡 Under 100 words. Busy owners read and reply to these. Free post in subject line gets it opened.</p></div>
+    <div class="out-card"><div class="out-card-hdr"><div class="out-num">8</div><div><div class="out-msg-title">The Social Proof Email</div><div class="out-target">Best for: After you have 1–2 client results to reference</div></div><span class="out-bdg em" style="margin-left:auto;">Cold Email</span></div><div class="out-msgbox" id="out-msg8">Subject: How [Local Restaurant] got 3x more engagement in 30 days
+
+Hi [Owner Name],
+
+I'm Robin Dhital from Harrisburg Content Co. — I help local Harrisburg restaurants grow their social media presence without the owner spending hours on it.
+
+I recently worked with [Client Restaurant Name] here in Harrisburg, and within the first month we tripled their Instagram engagement and they started getting direct reservation DMs from social media for the first time.
+
+What we do: 12 done-for-you posts per month — captions, branded graphics, hashtags, and scheduling. You send us photos, we handle everything else. Starting at $497/month.
+
+I'd love to do one free sample post for [Restaurant Name] so you can see the quality before deciding anything.
+
+Would you be open to a quick 10-minute call this week, or I can just send the post directly?
+
+— Robin Dhital
+Harrisburg Content Co.
+dhital.robin33@gmail.com | harrisburgcontentco.com<button class="out-cbtn" onclick="outCopy('out-msg8',this)">Copy</button></div><p class="out-tip">💡 Swap in a real client name once you have one. Until then, use the Mount Everest Cuisine demo.</p></div>
+    <div class="out-card"><div class="out-card-hdr"><div class="out-num">9</div><div><div class="out-msg-title">The Google Business Angle</div><div class="out-target">Best for: Restaurants with an active Google listing but weak social</div></div><span class="out-bdg em" style="margin-left:auto;">Cold Email</span></div><div class="out-msgbox" id="out-msg9">Subject: Quick question about [Restaurant Name]'s social media
+
+Hi [Owner Name],
+
+I found [Restaurant Name] on Google — great reviews! But I noticed your Instagram/Facebook hasn't been updated recently, and I think you're leaving a lot of customers on the table.
+
+People in Harrisburg are actively searching for places to eat on Instagram and Facebook before they decide where to go. If your page is quiet, they scroll past you to a competitor.
+
+I run Harrisburg Content Co. and I specialize in keeping local restaurant pages active and eye-catching — 12 posts per month, fully done for you, starting at $497/month.
+
+I'll create one free custom post for [Restaurant Name] this week so you can see exactly what it looks like. No cost, no obligation.
+
+Just reply to this email and I'll get started.
+
+— Robin Dhital
+Harrisburg Content Co.
+dhital.robin33@gmail.com
+harrisburgcontentco.com<button class="out-cbtn" onclick="outCopy('out-msg9',this)">Copy</button></div><p class="out-tip">💡 Find targets by Googling "restaurants Harrisburg PA" — any with 4+ stars but no recent social activity.</p></div>
+    <div class="out-card"><div class="out-card-hdr"><div class="out-num">10</div><div><div class="out-msg-title">The Follow-Up Email</div><div class="out-target">Best for: Sending 5–7 days after any unanswered outreach</div></div><span class="out-bdg em" style="margin-left:auto;">Cold Email</span></div><div class="out-msgbox" id="out-msg10">Subject: Re: Free social media post for [Restaurant Name]
+
+Hi [Owner Name],
+
+Just following up on my note from last week — wanted to make sure it didn't get buried.
+
+To recap: I'd love to create one free Instagram or Facebook post for [Restaurant Name] — caption, branded graphic, hashtags — completely free, no commitment.
+
+If you like it, we can talk about doing 12 posts a month ($497/month, everything done for you). If not, the post is yours to keep.
+
+Either way, zero risk.
+
+Worth a quick reply?
+
+— Robin Dhital
+Harrisburg Content Co.
+dhital.robin33@gmail.com<button class="out-cbtn" onclick="outCopy('out-msg10',this)">Copy</button></div><p class="out-tip">💡 Most replies come from the follow-up. Always follow up once, 5–7 days later.</p></div>
+
+    <div class="out-notebox">
+      <h3>📋 Outreach Strategy</h3>
+      <p><strong>Day 1:</strong> 5 Instagram DMs (msgs 1–3, rotate) + 2 cold emails (msg 7)</p>
+      <p style="margin-top:5px;"><strong>Day 2:</strong> 5 Facebook DMs (msgs 4–6, rotate) + 3 cold emails (msgs 8–9)</p>
+      <p style="margin-top:5px;"><strong>Day 7:</strong> Follow up on everyone who didn't reply (msg 10)</p>
+      <p style="margin-top:10px;"><strong>Where to find contacts:</strong> Google Maps → "restaurants Harrisburg PA" · Yelp Harrisburg · Facebook search · Instagram #harrisburgfood</p>
+      <p style="margin-top:8px;"><strong>Goal:</strong> 10 outreach/day → 1–3 replies per 10 → 1 paying client per 20–30 messages on average.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CLIENT DEMO ══ -->
+<div id="sec-demo" class="hcc-sec">
+  <div class="sec-hdr" style="background:linear-gradient(135deg,#6C47FF,#9B59B6);">
+    <div class="sec-hdr-title">✨ Client Demo</div>
+    <div class="sec-hdr-actions">
+      <button class="hb" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);" onclick="window.open('https://dhitalrk.github.io/harrisburg-content-co-website/#pricing','_blank')">🚀 View Pricing Page</button>
+    </div>
+  </div>
+  <div class="dm-hero">
+    <div class="dm-hlabel">✨ Real Results for Harrisburg Businesses</div>
+    <h2>This Is What Your<br>Content Could Look Like</h2>
+    <p>Pick your business type below and see exactly what we'd post for you — captions, graphics, hashtags, and the results to match.</p>
+  </div>
+  <div class="dm-sel">
+    <div class="dm-sel-lbl">I own a…</div>
+    <div class="dm-biz-grid">
+      <button class="dm-biz-btn active" onclick="demoSelectBiz('restaurant',this)">🍽️ Restaurant / Café</button>
+      <button class="dm-biz-btn" onclick="demoSelectBiz('salon',this)">💇 Salon / Spa</button>
+      <button class="dm-biz-btn" onclick="demoSelectBiz('retail',this)">🛍️ Retail Shop</button>
+      <button class="dm-biz-btn" onclick="demoSelectBiz('fitness',this)">💪 Gym / Fitness</button>
+      <button class="dm-biz-btn" onclick="demoSelectBiz('realestate',this)">🏡 Real Estate</button>
+      <button class="dm-biz-btn" onclick="demoSelectBiz('dental',this)">🦷 Dental / Medical</button>
+    </div>
+  </div>
+  <div class="dm-tabs">
+    <button class="dm-tbtn active" onclick="demoSwitchTab('posts',this)">📱 Sample Posts</button>
+    <button class="dm-tbtn" onclick="demoSwitchTab('before',this)">⚡ Before &amp; After</button>
+    <button class="dm-tbtn" onclick="demoSwitchTab('results',this)">📈 Results &amp; Growth</button>
+  </div>
+  <div class="dm-panel active" id="dm-panel-posts">
+    <div class="dm-stitle">Your Content — Ready to Post</div>
+    <div class="dm-ssub" id="dm-posts-sub">Here's what a week of content looks like for your restaurant</div>
+    <div class="dm-posts-grid" id="dm-posts-grid"></div>
+  </div>
+  <div class="dm-panel" id="dm-panel-before">
+    <div class="dm-stitle">The Difference Is Obvious</div>
+    <div class="dm-ssub" id="dm-ba-sub">Most restaurant owners post like this. Here's what we do instead.</div>
+    <div id="dm-ba-pairs"></div>
+  </div>
+  <div class="dm-panel" id="dm-panel-results">
+    <div class="dm-stitle">What Clients See After 90 Days</div>
+    <div class="dm-ssub" id="dm-results-sub">Average results for Harrisburg restaurant clients on our Starter plan</div>
+    <div class="dm-stats-grid" id="dm-stats-grid"></div>
+    <div class="dm-chart-card">
+      <div class="dm-chart-title">Follower Growth — Month by Month</div>
+      <div class="dm-chart-sub" id="dm-chart-sub">Before vs. After working with Harrisburg Content Co.</div>
+      <div class="dm-chart-bars" id="dm-chart-bars"></div>
+      <div class="dm-chart-legend">
+        <div class="dm-legend-item"><div class="dm-legend-dot" style="background:#6C47FF"></div> With HCC</div>
+        <div class="dm-legend-item"><div class="dm-legend-dot" style="background:#3a3a50"></div> Before HCC</div>
+      </div>
+    </div>
+    <div class="dm-cta">
+      <h3>Ready to See These Numbers?</h3>
+      <p>Most clients see results in the first 30 days. No contracts — cancel anytime with our 7-day guarantee.</p>
+      <div class="dm-cta-btns">
+        <button class="dm-cta-btn dm-cta-pri" onclick="window.open('https://dhitalrk.github.io/harrisburg-content-co-website/#pricing','_blank')">🚀 Get Started Today</button>
+        <button class="dm-cta-btn dm-cta-sec" onclick="window.open('mailto:dhital.robin33@gmail.com','_blank')">📧 Email Robin</button>
+      </div>
+      <p style="font-size:.74rem;color:#8888AA;margin-top:12px;">📞 (717) 461-3210 · harrisburgcontentco.com</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ONBOARDING ══ -->
+<div id="sec-ob" class="hcc-sec">
+  <div class="sec-hdr"><div class="sec-hdr-title">📋 Client <span>Onboarding</span> Kit</div></div>
+  <div class="ob-body">
+    <div class="ob-tabs">
+      <button class="ob-tbtn active" onclick="onbTab('intake',this)">📋 Client Intake Form</button>
+      <button class="ob-tbtn" onclick="onbTab('welcome',this)">📧 Welcome Email</button>
+      <button class="ob-tbtn" onclick="onbTab('process',this)">🔄 Process Guide</button>
+    </div>
+    <div class="ob-tc active" id="ob-intake">
+      <div class="ob-card"><h2>Section 1 — Business Basics</h2>
+        <div class="ob-field"><label>Business Name <span>*required</span></label><input type="text" class="ob-input" placeholder="e.g. Mount Everest Nepali & Indian Cuisine"/></div>
+        <div class="ob-field"><label>Owner / Contact Name <span>*required</span></label><input type="text" class="ob-input" placeholder="e.g. Sushil Tamang"/></div>
+        <div class="ob-field"><label>Business Phone</label><input type="tel" class="ob-input" placeholder="(717) 000-0000"/></div>
+        <div class="ob-field"><label>Business Email</label><input type="email" class="ob-input" placeholder="owner@yourbusiness.com"/></div>
+        <div class="ob-field"><label>Business Address</label><input type="text" class="ob-input" placeholder="e.g. 3400 Paxton St, Harrisburg, PA 17111"/></div>
+        <div class="ob-field"><label>Website URL <span>if any</span></label><input type="url" class="ob-input" placeholder="https://yourwebsite.com"/></div>
+        <div class="ob-field"><label>Business Hours</label><textarea class="ob-input" placeholder="e.g. Mon–Fri 11am–10pm, Sat–Sun 12pm–11pm"></textarea></div>
+      </div>
+      <div class="ob-card"><h2>Section 2 — Social Media Accounts</h2>
+        <div class="ob-field"><label>Facebook Page URL</label><input type="url" class="ob-input" placeholder="https://facebook.com/yourbusiness"/></div>
+        <div class="ob-field"><label>Instagram Handle</label><input type="text" class="ob-input" placeholder="@yourbusiness"/></div>
+        <div class="ob-field"><label>Other Platforms <span>TikTok, Google Business, etc.</span></label><input type="text" class="ob-input" placeholder="TikTok: @handle / Google Business: link"/></div>
+        <div class="ob-field"><label>Direct posting access?</label><div class="ob-cg"><label class="ob-ci"><input type="radio" name="sched"/> Yes — I'll share login access</label><label class="ob-ci"><input type="radio" name="sched"/> No — send me posts to post</label><label class="ob-ci"><input type="radio" name="sched"/> I'll decide later</label></div></div>
+      </div>
+      <div class="ob-card"><h2>Section 3 — Your Business &amp; Brand</h2>
+        <div class="ob-field"><label>Describe your business in 2–3 sentences</label><textarea class="ob-input" placeholder="e.g. We're a family-owned Nepali and Indian restaurant in Harrisburg serving authentic dishes since 2015..."></textarea></div>
+        <div class="ob-field"><label>Top 3–5 products/dishes/services</label><textarea class="ob-input" placeholder="e.g. 1. Lamb Sekuwa  2. Chicken Tikka Masala  3. Lunch Buffet ($12.99)..."></textarea></div>
+        <div class="ob-field"><label>What makes you different from competitors?</label><textarea class="ob-input" placeholder="e.g. We're the only authentic Nepali restaurant in the city. Family recipes, no frozen ingredients."></textarea></div>
+        <div class="ob-field"><label>Ideal customer</label><div class="ob-cg"><label class="ob-ci"><input type="checkbox"/> Families</label><label class="ob-ci"><input type="checkbox"/> Young professionals</label><label class="ob-ci"><input type="checkbox"/> Lunch crowd</label><label class="ob-ci"><input type="checkbox"/> Date night couples</label><label class="ob-ci"><input type="checkbox"/> Local community</label><label class="ob-ci"><input type="checkbox"/> Tourists</label><label class="ob-ci"><input type="checkbox"/> Students</label></div></div>
+        <div class="ob-field"><label>Brand Tone / Vibe</label><div class="ob-cg"><label class="ob-ci"><input type="checkbox"/> Warm &amp; welcoming</label><label class="ob-ci"><input type="checkbox"/> Fun &amp; playful</label><label class="ob-ci"><input type="checkbox"/> Professional</label><label class="ob-ci"><input type="checkbox"/> Bold &amp; energetic</label><label class="ob-ci"><input type="checkbox"/> Community-focused</label><label class="ob-ci"><input type="checkbox"/> Premium / upscale</label></div></div>
+        <div class="ob-field"><label>Brand Colors <span>if known</span></label><input type="text" class="ob-input" placeholder="e.g. Red, gold, white — or 'I don't have set colors yet'"/></div>
+      </div>
+      <div class="ob-card"><h2>Section 4 — Content Preferences</h2>
+        <div class="ob-field"><label>Content types you want most</label><div class="ob-cg"><label class="ob-ci"><input type="checkbox"/> Product/food photos</label><label class="ob-ci"><input type="checkbox"/> Promotions &amp; specials</label><label class="ob-ci"><input type="checkbox"/> Behind-the-scenes</label><label class="ob-ci"><input type="checkbox"/> Customer spotlights</label><label class="ob-ci"><input type="checkbox"/> Events &amp; announcements</label><label class="ob-ci"><input type="checkbox"/> Holiday &amp; seasonal</label><label class="ob-ci"><input type="checkbox"/> Educational / fun facts</label><label class="ob-ci"><input type="checkbox"/> Staff introductions</label></div></div>
+        <div class="ob-field"><label>Topics / content to AVOID</label><textarea class="ob-input" placeholder="e.g. No political content, don't mention competitor names..."></textarea></div>
+        <div class="ob-field"><label>Upcoming promotions or events to plan around</label><textarea class="ob-input" placeholder="e.g. New menu launching July 1st, Happy Hour starting Fridays in June..."></textarea></div>
+        <div class="ob-field"><label>How will you send photos each month?</label><div class="ob-cg"><label class="ob-ci"><input type="radio" name="photos"/> WhatsApp</label><label class="ob-ci"><input type="radio" name="photos"/> Email</label><label class="ob-ci"><input type="radio" name="photos"/> Google Drive</label><label class="ob-ci"><input type="radio" name="photos"/> iMessage</label></div></div>
+        <div class="ob-field"><label>Anything else we should know?</label><textarea class="ob-input" placeholder="Awards, press mentions, origin story, certifications, etc."></textarea></div>
+      </div>
+      <div class="ob-hl">💡 <strong>Internal note:</strong> Once this form is filled out, save it as the client's master profile. Everything here feeds directly into the monthly content package — brand tone, target audience, upcoming events, and content preferences. Reference it every month.</div>
+    </div>
+    <div class="ob-tc" id="ob-welcome">
+      <div class="ob-card"><h2>Welcome Email — Send within 24 hours of signing</h2>
+        <div class="ob-email-box" id="ob-welcomeEmail">Subject: Welcome to Harrisburg Content Co. — Here's What Happens Next 🎉
+
+Hi [Client Name],
+
+Welcome aboard! I'm so excited to work with [Business Name] and help you grow on social media.
+
+Here's exactly what happens from here:
+
+STEP 1 — Fill out your intake form (link below)
+This takes about 10 minutes and tells me everything I need to create content that's truly on-brand for you. The more detail you give, the better your content will be.
+
+👉 [INTAKE FORM LINK]
+
+STEP 2 — Send me your photos
+Once I have your intake form, I'll reach out to let you know what photos to send for your first month. You can send them via WhatsApp, email, or Google Drive — whatever's easiest for you.
+
+STEP 3 — Review your content calendar
+I'll send you a full preview of all your posts for the month before anything goes live. You'll have 48 hours to request any changes.
+
+STEP 4 — Sit back and let your page grow
+Once you approve, everything is scheduled and posts automatically. Your only job is to reply to comments and DMs from new customers.
+
+A few things to know:
+✅ Your first content package will be delivered within 5 business days of receiving your intake form + photos
+✅ You'll get a monthly check-in from me around the 15th with a performance summary
+✅ You can reach me anytime at dhital.robin33@gmail.com or by replying to this email
+
+I take the stress of social media completely off your plate so you can focus on running your business. That's the whole point.
+
+Looking forward to making something great together!
+
+— Robin Dhital
+Harrisburg Content Co.
+📞 (717) 461-3210
+dhital.robin33@gmail.com
+harrisburgcontentco.com</div>
+        <button class="ob-cbtn" onclick="onbCopy('ob-welcomeEmail',this)">Copy</button>
+      </div>
+      <div class="ob-card"><h2>Follow-Up Email — If intake form not returned in 3 days</h2>
+        <div class="ob-email-box" id="ob-followupEmail">Subject: Quick reminder — your intake form for [Business Name]
+
+Hi [Client Name],
+
+Just a quick nudge — I haven't received your intake form yet and I want to make sure we get your first content package ready on time!
+
+It only takes about 10 minutes and it's the most important step so I can create content that truly represents your business.
+
+👉 [INTAKE FORM LINK]
+
+If you have any questions or want to do it over the phone instead, just reply here and we'll set up a quick 15-minute call.
+
+— Robin
+Harrisburg Content Co.
+dhital.robin33@gmail.com</div>
+        <button class="ob-cbtn" onclick="onbCopy('ob-followupEmail',this)">Copy</button>
+      </div>
+      <div class="ob-card"><h2>Monthly Photo Request Template</h2>
+        <div class="ob-email-box" id="ob-photoReqEmail">Hi [Client Name]!
+
+Getting started on your [Month] content package — here's what I need from you:
+
+📸 Photos to send me this month:
+• 5–8 food/product photos (good lighting, clean background — phone camera is totally fine)
+• 1–2 photos of your space / storefront
+• 1 photo of you or your staff (optional but great for engagement)
+• Any photos from recent events or specials
+
+📋 Also let me know:
+• Any upcoming specials, promotions, or events for [Month]?
+• Anything you want to highlight or announce this month?
+• Any changes to hours, menu, or offerings?
+
+You can send photos via [WhatsApp / email / Google Drive — fill in their preference].
+
+No rush — just need these by [DATE, give them 3–4 days]. Once I have them, your full content package will be ready within 3 business days.
+
+Thanks!
+— Robin</div>
+        <button class="ob-cbtn" onclick="onbCopy('ob-photoReqEmail',this)">Copy</button>
+      </div>
+    </div>
+    <div class="ob-tc" id="ob-process">
+      <div class="ob-card"><h2>Monthly Client Workflow — Step by Step</h2>
+        <ul class="ob-steps">
+          <li><div class="ob-snum">1</div><div><strong>Client signs + pays</strong> — Send welcome email within 24 hours with the intake form link.</div></li>
+          <li><div class="ob-snum">2</div><div><strong>Receive intake form</strong> — Save as client profile. Note brand tone, key products, upcoming events, content preferences.</div></li>
+          <li><div class="ob-snum">3</div><div><strong>Request photos</strong> — Message client via their preferred channel. Tell them exactly what photos you need.</div></li>
+          <li><div class="ob-snum">4</div><div><strong>Build content package</strong> — Generate full monthly package: content calendar, all captions, hashtags, and graphics. Target turnaround: 2–3 days.</div></li>
+          <li><div class="ob-snum">5</div><div><strong>Send preview for approval</strong> — Email or message client with full content package. Give them 48 hours to review and request changes.</div></li>
+          <li><div class="ob-snum">6</div><div><strong>Make revisions if needed</strong> — Usually 0–2 small changes. Turnaround: same day or next day.</div></li>
+          <li><div class="ob-snum">7</div><div><strong>Schedule all posts</strong> — Log into Meta Business Suite and schedule all posts at the times shown in the calendar. Confirm with client once done.</div></li>
+          <li><div class="ob-snum">8</div><div><strong>Mid-month check-in</strong> — Around the 15th, send a 3-line update: top performing post, total engagement, what's working. Takes 5 minutes.</div></li>
+          <li><div class="ob-snum">9</div><div><strong>Next month package sent before month-end</strong> — Client should receive Month 2 content before Month 1 ends. No gaps. This drives renewals.</div></li>
+          <li><div class="ob-snum">10</div><div><strong>Renewal is automatic</strong> — If they're on Stripe subscription, it charges automatically. Keep delivering and they'll stay.</div></li>
+        </ul>
+      </div>
+      <div class="ob-hl">💡 <strong>Pro tip:</strong> Build a Google Drive folder for each client — one folder per month with their photos, final content package, and approved calendar. Keeps everything clean and makes it easy to reference past content so you never repeat a post.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WORKFLOW ══ -->
+<div id="sec-wf" class="hcc-sec">
+  <div class="sec-hdr"><div class="sec-hdr-title">⚙️ Content <span>Workflow</span></div></div>
+  <div class="wf-body">
+    <div class="wf-sec">
+      <div class="wf-stitle">What Each Plan Delivers</div>
+      <div class="wf-tiers">
+        <div class="wf-tier-card"><h4>Starter — $497/mo</h4><ul><li>12 posts (captions + hashtags)</li><li>3 branded graphics</li><li>1 platform (Instagram or Facebook)</li><li>Content calendar</li><li>Scheduling (if access given)</li></ul></div>
+        <div class="wf-tier-card"><h4>Growth — $997/mo</h4><ul><li>30 posts (captions + hashtags)</li><li>8 branded graphics</li><li>2 platforms</li><li>4 video scripts (Reels/TikTok)</li><li>4 Google Business posts</li><li>Monthly performance review</li></ul></div>
+        <div class="wf-tier-card"><h4>Authority — $1,997/mo</h4><ul><li>60 posts (captions + hashtags)</li><li>16 branded graphics</li><li>3 platforms</li><li>8 video scripts</li><li>1 blog post</li><li>1 email newsletter</li><li>Monthly strategy call</li></ul></div>
+      </div>
+    </div>
+    <div class="wf-sec">
+      <div class="wf-stitle">Step 1 — Client Variables</div>
+      <div class="wf-card" style="padding:0;">
+        <div class="wf-twrap"><table><thead><tr><th>Variable</th><th>Where to Get It</th><th>Example</th></tr></thead><tbody>
+          <tr><td>[BUSINESS_NAME]</td><td>Intake form</td><td>Mount Everest Cuisine</td></tr>
+          <tr><td>[CITY]</td><td>Intake form</td><td>Harrisburg, PA</td></tr>
+          <tr><td>[INDUSTRY]</td><td>Intake form</td><td>Nepali &amp; Indian Restaurant</td></tr>
+          <tr><td>[TOP_PRODUCTS]</td><td>Intake form</td><td>Lamb Sekuwa, Momo, Lunch Buffet</td></tr>
+          <tr><td>[TARGET_CUSTOMER]</td><td>Intake form</td><td>Families, young professionals, lunch crowd</td></tr>
+          <tr><td>[BRAND_TONE]</td><td>Intake form</td><td>Warm, community-focused, authentic</td></tr>
+          <tr><td>[UNIQUE_ANGLE]</td><td>Intake form</td><td>Only authentic Nepali restaurant in Harrisburg</td></tr>
+          <tr><td>[MONTHLY_EVENTS]</td><td>Monthly photo request reply</td><td>New brunch menu launching June 15</td></tr>
+          <tr><td>[PLATFORM]</td><td>Intake form</td><td>Instagram + Facebook</td></tr>
+          <tr><td>[MONTH]</td><td>Current month</td><td>June 2026</td></tr>
+          <tr><td>[POST_COUNT]</td><td>Their plan tier</td><td>12 (Starter) / 30 (Growth) / 60 (Authority)</td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
+    <div class="wf-sec">
+      <div class="wf-stitle">Step 2 — Run These Prompts (in order)</div>
+      <div class="wf-card"><h3>Prompt A — Content Strategy &amp; Themes</h3><div style="position:relative;"><div class="wf-prompt" id="wf-pA">You are a social media strategist for a local small business.
+
+Business: <span class="wf-var">[BUSINESS_NAME]</span>
+Location: <span class="wf-var">[CITY]</span>
+Industry: <span class="wf-var">[INDUSTRY]</span>
+Top products/services: <span class="wf-var">[TOP_PRODUCTS]</span>
+Target customer: <span class="wf-var">[TARGET_CUSTOMER]</span>
+Brand tone: <span class="wf-var">[BRAND_TONE]</span>
+What makes them unique: <span class="wf-var">[UNIQUE_ANGLE]</span>
+This month's events/specials: <span class="wf-var">[MONTHLY_EVENTS]</span>
+Platform: <span class="wf-var">[PLATFORM]</span>
+Month: <span class="wf-var">[MONTH]</span>
+
+Create a content strategy for this month with:
+1. 5 content themes/pillars (e.g. "Product Spotlight", "Community Love", "Behind the Scenes")
+2. A recommended posting schedule (days and times)
+3. 3 hashtag sets (branded, local, niche) — 15-20 hashtags each
+4. 2 content ideas for each theme (10 ideas total)
+
+Keep it specific to their business, not generic.</div><button class="wf-cbtn" onclick="wfCopy('wf-pA',this)">Copy</button></div></div>
+      <div class="wf-card"><h3>Prompt B — Full Caption Pack</h3><div style="position:relative;"><div class="wf-prompt" id="wf-pB">You are a social media copywriter specializing in local small business content.
+
+Business: <span class="wf-var">[BUSINESS_NAME]</span> — <span class="wf-var">[INDUSTRY]</span> in <span class="wf-var">[CITY]</span>
+Top products: <span class="wf-var">[TOP_PRODUCTS]</span>
+Brand tone: <span class="wf-var">[BRAND_TONE]</span>
+Target customer: <span class="wf-var">[TARGET_CUSTOMER]</span>
+Unique angle: <span class="wf-var">[UNIQUE_ANGLE]</span>
+This month's events: <span class="wf-var">[MONTHLY_EVENTS]</span>
+Platform: <span class="wf-var">[PLATFORM]</span>
+
+Write <span class="wf-var">[POST_COUNT]</span> social media posts for <span class="wf-var">[MONTH]</span>.
+
+For each post include:
+- Post number and topic (e.g. "Post 1 — Lunch Buffet Promo")
+- Full caption (2–4 sentences, matches brand tone, ends with a CTA)
+- 15–20 hashtags (mix of branded, local Harrisburg, and niche tags)
+- Best day/time to post
+- Photo direction (describe what photo would work best)
+
+Vary the content mix: product features, promotions, behind-the-scenes, community, seasonal, and engagement posts.
+Do NOT repeat the same format twice in a row. Make each post feel fresh.</div><button class="wf-cbtn" onclick="wfCopy('wf-pB',this)">Copy</button></div></div>
+      <div class="wf-card"><h3>Prompt C — Graphic Design Briefs (for Canva)</h3><div style="position:relative;"><div class="wf-prompt" id="wf-pC">Create design briefs for <span class="wf-var">[GRAPHIC_COUNT]</span> social media graphics for <span class="wf-var">[BUSINESS_NAME]</span>.
+
+Brand colors: <span class="wf-var">[BRAND_COLORS]</span>
+Brand tone: <span class="wf-var">[BRAND_TONE]</span>
+Platform: <span class="wf-var">[PLATFORM]</span> (use 1080x1080px for feed, 1080x1920px for Stories)
+
+For each graphic provide:
+1. Graphic type (e.g. "Promotional announcement", "Quote card", "Product feature")
+2. Headline text (bold, max 8 words)
+3. Subtext (1 line, max 15 words)
+4. Call to action text (e.g. "Order Now", "Book a Table", "Visit Us")
+5. Background suggestion (solid color, food photo, texture)
+6. Which post number from the caption pack it pairs with
+
+Make the designs scroll-stopping and brand-consistent.</div><button class="wf-cbtn" onclick="wfCopy('wf-pC',this)">Copy</button></div></div>
+      <div class="wf-card"><h3>Prompt D — Video/Reel Scripts (Growth &amp; Authority plans only)</h3><div style="position:relative;"><div class="wf-prompt" id="wf-pD">Write <span class="wf-var">[REEL_COUNT]</span> short-form video scripts (15–30 seconds each) for <span class="wf-var">[BUSINESS_NAME]</span> on <span class="wf-var">[PLATFORM]</span>.
+
+Business type: <span class="wf-var">[INDUSTRY]</span> in <span class="wf-var">[CITY]</span>
+Brand tone: <span class="wf-var">[BRAND_TONE]</span>
+Top products: <span class="wf-var">[TOP_PRODUCTS]</span>
+
+For each script:
+- Hook (first 3 seconds — must grab attention immediately)
+- Visual directions (what to film, shot by shot)
+- Voiceover or on-screen text (word for word)
+- Music vibe (e.g. "upbeat, trending", "calm and cozy")
+- Caption to use with the video
+- Hashtags (15 tags)
+
+Make hooks that stop the scroll. Keep filming instructions simple — the owner should be able to film these on their phone.</div><button class="wf-cbtn" onclick="wfCopy('wf-pD',this)">Copy</button></div></div>
+      <div class="wf-card"><h3>Prompt E — Google Business Posts (Growth &amp; Authority plans)</h3><div style="position:relative;"><div class="wf-prompt" id="wf-pE">Write 4 Google Business Profile posts for <span class="wf-var">[BUSINESS_NAME]</span> in <span class="wf-var">[CITY]</span>.
+
+Industry: <span class="wf-var">[INDUSTRY]</span>
+Top products: <span class="wf-var">[TOP_PRODUCTS]</span>
+This month's events: <span class="wf-var">[MONTHLY_EVENTS]</span>
+
+For each Google Business post:
+- Post type: What's New / Event / Offer / Product
+- Title (max 58 characters)
+- Body copy (150–300 characters — Google's sweet spot)
+- Call to action button (Book, Order online, Buy, Learn more, Sign up, Call)
+- Link destination (website, phone, or reservation page)
+
+Posts should help the business show up in local Google searches. Keep them professional and keyword-rich for Harrisburg local SEO.</div><button class="wf-cbtn" onclick="wfCopy('wf-pE',this)">Copy</button></div></div>
+    </div>
+    <div class="wf-sec">
+      <div class="wf-stitle">Step 3 — Pre-Delivery Checklist</div>
+      <div class="wf-card"><ul class="wf-checklist">
+        <li><input type="checkbox"/> All [POST_COUNT] captions written and proofread</li>
+        <li><input type="checkbox"/> Every post has a clear CTA (Book, Order, Visit, DM, Call)</li>
+        <li><input type="checkbox"/> Hashtags on every post (15–20 per post)</li>
+        <li><input type="checkbox"/> No two consecutive posts use the same format or topic</li>
+        <li><input type="checkbox"/> All [GRAPHIC_COUNT] Canva graphics designed and exported as PNG</li>
+        <li><input type="checkbox"/> Content calendar completed (post number, date, time, platform)</li>
+        <li><input type="checkbox"/> Client's business name, address, phone spelled correctly in every post</li>
+        <li><input type="checkbox"/> Any upcoming events/specials mentioned on the correct dates</li>
+        <li><input type="checkbox"/> No competitor names mentioned</li>
+        <li><input type="checkbox"/> Tone consistent with client's brand preference throughout</li>
+        <li><input type="checkbox"/> Package formatted cleanly and ready to send</li>
+        <li><input type="checkbox"/> Sent to client for approval with 48-hour review window noted</li>
+      </ul></div>
+    </div>
+    <div class="wf-sec">
+      <div class="wf-stitle">Production Time Estimates</div>
+      <div class="wf-card" style="padding:0;"><div class="wf-twrap"><table><thead><tr><th>Task</th><th>Starter (12 posts)</th><th>Growth (30 posts)</th><th>Authority (60 posts)</th></tr></thead><tbody>
+        <tr><td>Content strategy prompt</td><td>5 min</td><td>5 min</td><td>5 min</td></tr>
+        <tr><td>Generate all captions</td><td>10 min</td><td>20 min</td><td>35 min</td></tr>
+        <tr><td>Build graphics in Canva</td><td>30 min</td><td>60 min</td><td>90 min</td></tr>
+        <tr><td>Build content calendar</td><td>10 min</td><td>15 min</td><td>20 min</td></tr>
+        <tr><td>Reel scripts</td><td>—</td><td>20 min</td><td>35 min</td></tr>
+        <tr><td>Google Business posts</td><td>—</td><td>10 min</td><td>10 min</td></tr>
+        <tr><td>Package + format for delivery</td><td>15 min</td><td>20 min</td><td>30 min</td></tr>
+        <tr><td><strong>Total</strong></td><td><strong>~70 min</strong></td><td><strong>~150 min</strong></td><td><strong>~225 min</strong></td></tr>
+      </tbody></table></div></div>
+      <div class="wf-hl">💡 Effective hourly rate: <strong>Starter ~$425/hr · Growth ~$400/hr · Authority ~$530/hr</strong>. As you get faster with repeat clients, those rates climb significantly.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REFUND TRACKER ══ -->
+<div id="sec-rf" class="hcc-sec">
+  <div class="sec-hdr">
+    <div class="sec-hdr-title">↩️ <span>Refund</span> Tracker</div>
+    <div class="sec-hdr-actions">
+      <button class="hb hb-outline" onclick="rfExportCSV()">⬇ Export CSV</button>
+      <button class="hb hb-green" onclick="rfOpenModal()">+ Log Refund</button>
+    </div>
+  </div>
+  <div class="rf-stats">
+    <div class="rf-stat-item"><div class="rf-stat-val" id="rf-stat-total">0</div><div class="rf-stat-lbl">Total Refunds</div></div>
+    <div class="rf-stat-item"><div class="rf-stat-val" id="rf-stat-amount">$0</div><div class="rf-stat-lbl">Total Refunded</div></div>
+    <div class="rf-stat-item"><div class="rf-stat-val" id="rf-stat-pending">0</div><div class="rf-stat-lbl">Pending</div></div>
+    <div class="rf-stat-item"><div class="rf-stat-val" id="rf-stat-completed">0</div><div class="rf-stat-lbl">Completed</div></div>
+    <div class="rf-stat-item"><div class="rf-stat-val" id="rf-stat-thismonth">$0</div><div class="rf-stat-lbl">This Month</div></div>
+  </div>
+  <div class="rf-toolbar">
+    <input class="rf-search" type="text" id="rf-search" placeholder="🔍 Search by name, business, email..." oninput="rfRenderTable()"/>
+    <select class="rf-filter" id="rf-filterStatus" onchange="rfRenderTable()">
+      <option value="">All Statuses</option>
+      <option value="Pending">Pending</option>
+      <option value="Processing">Processing</option>
+      <option value="Completed">Completed</option>
+      <option value="Denied">Denied</option>
+    </select>
+    <select class="rf-filter" id="rf-filterPlan" onchange="rfRenderTable()">
+      <option value="">All Plans</option>
+      <option value="Starter">Starter</option>
+      <option value="Growth">Growth</option>
+      <option value="Authority">Authority</option>
+    </select>
+  </div>
+  <div class="rf-twrap">
+    <table>
+      <thead><tr><th>#</th><th>Client</th><th>Plan</th><th>Amount</th><th>Reason</th><th>Request Date</th><th>Status</th><th>Stripe ID</th><th>Actions</th></tr></thead>
+      <tbody id="rf-tableBody"></tbody>
+    </table>
+    <div class="rf-empty" id="rf-emptyState" style="display:none;"><div class="rf-empty-ico">📋</div><h3>No refunds logged yet</h3><p>Click <strong>"+ Log Refund"</strong> to add your first entry.</p></div>
+  </div>
+</div>
+
+<!-- ══ REVENUE & TAX ══ -->
+<div id="sec-tx" class="hcc-sec">
+  <div class="sec-hdr">
+    <div class="sec-hdr-title">💰 Revenue &amp; <span>Tax</span> Tracker</div>
+  </div>
+  <div class="tx-subhdr">
+    <div class="tx-hbtns">
+      <select class="tx-yrsel" id="tx-yearSelect" onchange="txOnYearChange()"></select>
+    </div>
+    <div class="tx-hbtns">
+      <button class="hb hb-ghost" onclick="txExportCSV()">⬇ Export CSV</button>
+      <button class="hb hb-ghost" onclick="window.print()">🖨 Print</button>
+      <button class="hb hb-coral" onclick="txOpenModal('income')">+ Income</button>
+      <button class="hb hb-green" onclick="txOpenModal('expense')">+ Expense</button>
+    </div>
+  </div>
+  <div class="tx-tabs">
+    <div class="tx-tab active" onclick="txShowPanel('dashboard',this)">📊 Dashboard</div>
+    <div class="tx-tab" onclick="txShowPanel('income',this)">💵 Income</div>
+    <div class="tx-tab" onclick="txShowPanel('expenses',this)">💸 Expenses</div>
+    <div class="tx-tab" onclick="txShowPanel('quarterly',this)">📅 Quarterly Taxes</div>
+    <div class="tx-tab" onclick="txShowPanel('guide',this)">📋 Tax Guide</div>
+  </div>
+  <!-- Dashboard -->
+  <div class="tx-panel active" id="tx-panel-dashboard">
+    <div class="tx-sum-grid" id="tx-summaryCards"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;" id="tx-dashTables">
+      <div><div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:10px;">Recent Income</div><div class="tx-twrap"><table><thead><tr><th>Date</th><th>Client</th><th>Amount</th></tr></thead><tbody id="tx-recentIncome"></tbody></table></div></div>
+      <div><div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:10px;">Recent Expenses</div><div class="tx-twrap"><table><thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead><tbody id="tx-recentExpenses"></tbody></table></div></div>
+    </div>
+  </div>
+  <!-- Income -->
+  <div class="tx-panel" id="tx-panel-income">
+    <div class="tx-toolbar">
+      <input class="tx-tinput" type="text" id="tx-incomeSearch" placeholder="🔍 Search income..." oninput="txRenderIncome()"/>
+      <select class="tx-tsel" id="tx-incomeMonth" onchange="txRenderIncome()"><option value="">All Months</option></select>
+    </div>
+    <div class="tx-twrap"><table><thead><tr><th>#</th><th>Date</th><th>Client</th><th>Plan</th><th>Description</th><th>Amount</th><th>Method</th><th>Stripe ID</th><th>Actions</th></tr></thead><tbody id="tx-incomeTable"></tbody></table></div>
+  </div>
+  <!-- Expenses -->
+  <div class="tx-panel" id="tx-panel-expenses">
+    <div class="tx-toolbar">
+      <input class="tx-tinput" type="text" id="tx-expSearch" placeholder="🔍 Search expenses..." oninput="txRenderExpenses()"/>
+      <select class="tx-tsel" id="tx-expCategory" onchange="txRenderExpenses()">
+        <option value="">All Categories</option>
+        <option>Software &amp; Subscriptions</option><option>Marketing &amp; Advertising</option><option>Home Office</option><option>Phone &amp; Internet</option><option>Professional Services</option><option>Education &amp; Training</option><option>Equipment</option><option>Bank &amp; Payment Fees</option><option>Other</option>
+      </select>
+    </div>
+    <div class="tx-twrap"><table><thead><tr><th>#</th><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Deductible?</th><th>Receipt?</th><th>Actions</th></tr></thead><tbody id="tx-expTable"></tbody></table></div>
+  </div>
+  <!-- Quarterly -->
+  <div class="tx-panel" id="tx-panel-quarterly">
+    <div class="tx-alert tx-alert-y">⚠️ <strong>Important:</strong> These are estimates. Always confirm with a CPA before filing. PA residents owe federal income tax + 15.3% SE tax + 3.07% PA state tax + local EIT (~2%).</div>
+    <div class="tx-q-grid" id="tx-quarterCards"></div>
+    <div style="background:#fff;border-radius:11px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.05);margin-top:8px;">
+      <div style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:12px;">Year-End Tax Estimate</div>
+      <div id="tx-yearEndCalc"></div>
+    </div>
+  </div>
+  <!-- Tax Guide -->
+  <div class="tx-panel" id="tx-panel-guide">
+    <div class="tx-alert tx-alert-g">✅ <strong>Good news:</strong> Stripe automatically generates your <strong>1099-K</strong> at year end. Download it from Stripe dashboard → Tax forms. Give it to your CPA along with an export of this tracker.</div>
+    <div class="tx-guide-grid">
+      <div class="tx-gcard"><h3>📅 Key Tax Deadlines (2026)</h3><div class="tx-gitem"><strong>Jan 15:</strong> Q4 estimated tax payment due</div><div class="tx-gitem"><strong>Apr 15:</strong> File 2025 return + Q1 2026 estimated tax</div><div class="tx-gitem"><strong>Jun 16:</strong> Q2 estimated tax payment due</div><div class="tx-gitem"><strong>Sep 15:</strong> Q3 estimated tax payment due</div><div class="tx-gitem"><strong>Jan 15, 2027:</strong> Q4 2026 estimated tax due</div></div>
+      <div class="tx-gcard"><h3>💼 What to Deduct</h3><div class="tx-gitem">Canva Pro, ChatGPT Plus, Adobe, scheduling tools</div><div class="tx-gitem">Facebook/Instagram ad spend (for your own marketing)</div><div class="tx-gitem">Home office (% of rent/mortgage + utilities)</div><div class="tx-gitem">Phone bill (% used for business)</div><div class="tx-gitem">Internet bill (% used for business)</div><div class="tx-gitem">Courses, books, training on marketing/business</div><div class="tx-gitem">Laptop, monitor, or equipment for work</div><div class="tx-gitem">Stripe processing fees (~2.9% + 30¢)</div><div class="tx-gitem">CPA / accountant fees</div></div>
+      <div class="tx-gcard"><h3>🗂️ What to Give Your CPA</h3><div class="tx-gitem">This tracker exported as CSV</div><div class="tx-gitem">Stripe 1099-K (from Stripe dashboard → Tax forms)</div><div class="tx-gitem">Stripe transaction export (full year CSV)</div><div class="tx-gitem">Receipts for all expenses over $75</div><div class="tx-gitem">Bank statements for your business account</div><div class="tx-gitem">Last year's tax return (if applicable)</div></div>
+      <div class="tx-gcard"><h3>📲 How to Pay Estimated Taxes</h3><div class="tx-gitem"><strong>Federal:</strong> IRS Direct Pay — irs.gov/payments — free, instant</div><div class="tx-gitem"><strong>Pennsylvania:</strong> mypath.pa.gov — PA's official tax portal</div><div class="tx-gitem">Set aside ~30% of every payment into a separate savings account</div><div class="tx-gitem">Open a free "Tax" savings account and auto-transfer 30% of every Stripe payout</div></div>
+      <div class="tx-gcard"><h3>📦 Tax Forms You'll Use</h3><div class="tx-gitem"><strong>1099-K:</strong> From Stripe — your income statement. Mailed/emailed by Jan 31.</div><div class="tx-gitem"><strong>Schedule C:</strong> Profit &amp; loss from your business. Attached to your 1040.</div><div class="tx-gitem"><strong>Schedule SE:</strong> Self-employment tax calculation (15.3%).</div><div class="tx-gitem"><strong>Form 1040-ES:</strong> Used to calculate and pay quarterly estimates.</div><div class="tx-gitem"><strong>PA-40:</strong> Pennsylvania state income tax return.</div></div>
+      <div class="tx-gcard"><h3>💡 Quick Tips</h3><div class="tx-gitem">Open a <strong>separate business checking account</strong> — keeps income and expenses clean for the CPA</div><div class="tx-gitem">Save 30% of every payment into a tax savings account immediately</div><div class="tx-gitem">Track every expense in this tool — even small ones add up as deductions</div><div class="tx-gitem">Export this tracker as CSV every quarter and send to your CPA</div><div class="tx-gitem">Consider forming an LLC for liability protection (~$125 one-time in PA)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODALS ══ -->
+<!-- Refund Modal -->
+<div class="hcc-overlay" id="rf-overlay">
+  <div class="hcc-modal">
+    <h2 id="rf-modalTitle">Log New Refund</h2>
+    <div class="hcc-mgrid">
+      <div class="hcc-fg"><label>Client Name *</label><input type="text" id="rf-m-name" placeholder="Jane Smith" maxlength="100"/></div>
+      <div class="hcc-fg"><label>Business Name *</label><input type="text" id="rf-m-biz" placeholder="Smith's Salon" maxlength="100"/></div>
+      <div class="hcc-fg"><label>Email</label><input type="email" id="rf-m-email" placeholder="jane@business.com" maxlength="120"/></div>
+      <div class="hcc-fg"><label>Phone</label><input type="tel" id="rf-m-phone" placeholder="(717) 000-0000" maxlength="20"/></div>
+      <div class="hcc-fg"><label>Plan *</label><select id="rf-m-plan"><option value="">— Select —</option><option value="Starter">Starter ($497)</option><option value="Growth">Growth ($997)</option><option value="Authority">Authority ($1,997)</option></select></div>
+      <div class="hcc-fg"><label>Refund Amount ($) *</label><input type="number" id="rf-m-amount" placeholder="497.00" min="0" step="0.01"/></div>
+      <div class="hcc-fg"><label>Refund Type *</label><select id="rf-m-type"><option value="">— Select —</option><option value="Full Refund (7-day guarantee)">Full — 7-day guarantee</option><option value="Pro-rated refund">Pro-rated (partial month)</option><option value="Other">Other</option></select></div>
+      <div class="hcc-fg"><label>Request Date *</label><input type="date" id="rf-m-reqdate"/></div>
+      <div class="hcc-fg"><label>Reason *</label><select id="rf-m-reason"><option value="">— Select —</option><option value="Not satisfied with content quality">Content quality</option><option value="Content not delivered on time">Late delivery</option><option value="Business circumstances changed">Business change</option><option value="Service did not match description">Mismatch with description</option><option value="Duplicate charge">Duplicate charge</option><option value="7-day guarantee claim">7-day guarantee</option><option value="Other">Other</option></select></div>
+      <div class="hcc-fg"><label>Status *</label><select id="rf-m-status"><option value="Pending">Pending</option><option value="Processing">Processing</option><option value="Completed">Completed</option><option value="Denied">Denied</option></select></div>
+      <div class="hcc-fg full"><label>Stripe Transaction / Refund ID</label><input type="text" id="rf-m-stripe" placeholder="ch_... or re_..." maxlength="100"/></div>
+      <div class="hcc-fg"><label>Processed Date</label><input type="date" id="rf-m-procdate"/></div>
+      <div class="hcc-fg full"><label>Notes</label><textarea id="rf-m-notes" placeholder="Any notes about this refund..."></textarea></div>
+    </div>
+    <div class="hcc-mfoot">
+      <button class="hb" style="background:#f0f0f5;color:var(--navy);" onclick="rfCloseModal()">Cancel</button>
+      <button class="hb hb-coral" onclick="rfSaveRefund()">Save Refund</button>
+    </div>
+  </div>
+</div>
+<!-- Tax Modal -->
+<div class="hcc-overlay" id="tx-overlay">
+  <div class="hcc-modal">
+    <h2 id="tx-modalTitle">Add Income</h2>
+    <div class="hcc-mgrid" id="tx-modalFields"></div>
+    <div class="hcc-mfoot">
+      <button class="hb" style="background:#f0f0f5;color:var(--navy);" onclick="txCloseModal()">Cancel</button>
+      <button class="hb hb-coral" onclick="txSaveEntry()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="hcc-toast" id="hcc-toast"></div>
+
+</main>
+<script>
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function showSec(name){
+  document.querySelectorAll('.hcc-sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  const items=document.querySelectorAll('.sb-item');
+  items.forEach(i=>{if(i.getAttribute('onclick')&&i.getAttribute('onclick').includes("'"+name+"'"))i.classList.add('active');});
+  if(name==='tx'){txRenderAll();}
+  if(name==='rf'){rfUpdateStats();rfRenderTable();}
+  if(name==='demo'){demoRenderAll();}
+  if(name==='dash'){dashLoad();}
+}
+
+// ══════════════════════════════════════════
+// SHARED TOAST
+// ══════════════════════════════════════════
+function hccToast(msg,type){
+  const t=document.getElementById('hcc-toast');
+  t.textContent=msg;t.className='hcc-toast show'+(type?' '+type:'');
+  setTimeout(()=>t.className='hcc-toast',3000);
+}
+
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+function dashLoad(){
+  try{
+    const td=JSON.parse(localStorage.getItem('hcc_tax_v2'))||{income:[],expenses:[]};
+    const tr=JSON.parse(localStorage.getItem('hcc_refunds_v1'))||[];
+    const yr=new Date().getFullYear();
+    const inc=td.income.filter(e=>e.date&&new Date(e.date).getFullYear()===yr).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+    const exp=td.expenses.filter(e=>e.deductible&&e.date&&new Date(e.date).getFullYear()===yr).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+    const profit=inc-exp;
+    const seTax=Math.max(0,profit*0.9235*0.153);
+    const fedTax=Math.max(0,(profit-seTax/2)*0.22);
+    const stTax=Math.max(0,profit*0.0507);
+    const fmt=n=>'$'+parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+    document.getElementById('dash-revenue').textContent=fmt(inc);
+    document.getElementById('dash-rev2').textContent=fmt(inc);
+    document.getElementById('dash-profit').textContent=fmt(profit);
+    document.getElementById('dash-tax').textContent=fmt(seTax+fedTax+stTax);
+    document.getElementById('dash-refunds').textContent=tr.length;
+  }catch(e){}
+}
+
+// ══════════════════════════════════════════
+// OUTREACH
+// ══════════════════════════════════════════
+function outCopy(id,btn){
+  navigator.clipboard.writeText(document.getElementById(id).innerText);
+  btn.textContent='Copied!';btn.classList.add('copied');
+  setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);
+}
+
+// ══════════════════════════════════════════
+// CLIENT DEMO DATA
+// ══════════════════════════════════════════
+const DEMO_DATA={
+  restaurant:{label:"Restaurant / Café",postsub:"Here's what a week of content looks like for your restaurant",basub:"Most restaurant owners post like this. Here's what we do instead.",resultssub:"Average results for Harrisburg restaurant clients on our Starter plan",chartsub:"A local Harrisburg restaurant — before vs. after 6 months with HCC",
+    posts:[
+      {platform:"ig",pLabel:"Instagram",emoji:"🍕",cap:"🔥 Friday nights just got better.\n\nFresh from our wood-fired oven — the Harrisburg Special is back for the weekend. Limited tables, big flavor.\n\nReserve yours 👇 Link in bio.",tags:["#HarrisburgEats","#FoodiePA","#LocalRestaurant","#PizzaNight"],likes:"847",comments:"63",shares:"112"},
+      {platform:"fb",pLabel:"Facebook",emoji:"🥗",cap:"Happy Tuesday, Harrisburg! 🌿\n\nOur lunch specials are live — today's fan favorite is the grilled chicken harvest bowl. $12.99 before 3pm. Stop in or call ahead: (717) 461-3210.",tags:["#HarrisburgFood","#LunchSpecial","#SupportLocal"],likes:"312",comments:"28",shares:"47"},
+      {platform:"ig",pLabel:"Instagram",emoji:"☕",cap:"Sunday morning done right. ☀️\n\nBrunch is served 9am–2pm. Think fluffy stacks, bottomless coffee, and good vibes on Market Street.\n\nTag a friend you're bringing!",tags:["#HarrisburgBrunch","#SundayMorning","#CafeVibes","#BrunchPA"],likes:"1.2K",comments:"91",shares:"204"},
+      {platform:"ig",pLabel:"Instagram",emoji:"🎉",cap:"Behind the scenes at tonight's private event! 🙌\n\nWe do birthdays, corporate dinners & celebrations for up to 80 guests. DM us to check availability.",tags:["#PrivateDining","#EventVenue","#HarrisburgPA"],likes:"567",comments:"44",shares:"83"},
+      {platform:"fb",pLabel:"Facebook",emoji:"⭐",cap:"\"Best pasta I've had in Harrisburg. The service was warm and we felt like family.\"\n— Maria T., via Google Review ⭐⭐⭐⭐⭐\n\nThank you Maria! We love hearing this. See you next week 💜",tags:["#CustomerLove","#HarrisburgRestaurant","#5Stars"],likes:"489",comments:"52",shares:"71"},
+      {platform:"goog",pLabel:"Google Business",emoji:"📍",cap:"🍽️ Now accepting reservations for Mother's Day weekend!\n\nSpecial 3-course prix fixe menu. Book online or call (717) 461-3210.\n\nSeating fills up fast — don't wait!",tags:["#MothersDayDinner","#HarrisburgEats","#Reservations"],likes:"—",comments:"—",shares:"Views: 1,840"}
+    ],
+    ba:[
+      {emoji:"📸",bCap:"New menu item! Come try it 🍕",aCap:"🔥 Our Stone-Fired Margherita is officially on the menu — and it's flying out the kitchen.\n\nFresh mozzarella, basil from our garden, 48-hour dough. This is the real deal, Harrisburg.\n\nFirst 20 orders this week get a free garlic knot. Tag who you're bringing 👇",bMet:["❤️ 12 likes","💬 1 comment","👁 89 reach"],aMet:["❤️ 847 likes","💬 63 comments","👁 4,200+ reach"]},
+      {emoji:"🎯",bCap:"Open Tuesday through Sunday.",aCap:"📅 Your week just got tastier.\n\nMon–Thu: Happy Hour 4–7pm (half-off apps)\nFri–Sat: Live music 7pm | Full dinner menu\nSun: Brunch 9am–2pm ☀️\n\nSave this post so you never miss a deal 🔖",bMet:["❤️ 7 likes","💬 0 comments","📤 2 shares"],aMet:["❤️ 512 likes","💬 38 comments","📤 97 shares"]}
+    ],
+    stats:[{icon:"👁️",val:"+312%",lbl:"Profile Reach",chg:"+312%",col:"purple"},{icon:"❤️",val:"+580%",lbl:"Avg Engagement",chg:"+580%",col:"green"},{icon:"📩",val:"47",lbl:"New DM Leads/mo",chg:"vs 3 before",col:"blue"},{icon:"🌟",val:"+22",lbl:"New Google Reviews",chg:"in 90 days",col:"orange"}],
+    chart:[{l:"Mo 1",h:35,b:8},{l:"Mo 2",h:62,b:9},{l:"Mo 3",h:95,b:10},{l:"Mo 4",h:140,b:11},{l:"Mo 5",h:195,b:11},{l:"Mo 6",h:268,b:12}]},
+  salon:{label:"Salon / Spa",postsub:"Here's a sample content week for your salon or spa",basub:"Here's what most salons post — and what we create instead.",resultssub:"Average results for Harrisburg salon & spa clients",chartsub:"A Harrisburg salon — follower and booking growth before vs. after HCC",
+    posts:[
+      {platform:"ig",pLabel:"Instagram",emoji:"✂️",cap:"✨ Transformation Tuesday is here!\n\nFrom box dye disaster to this stunning balayage — our colorist worked her magic in just 3 hours.\n\nBook your color session 👇 Link in bio.",tags:["#HarrisburgSalon","#Balayage","#HairTransformation","#SalonPA"],likes:"1.4K",comments:"88",shares:"190"},
+      {platform:"ig",pLabel:"Instagram",emoji:"💆",cap:"You deserve a 60-minute escape. 🧖‍♀️\n\nOur Deep Tissue + Aromatherapy combo is our #1 booked service — and for good reason.\n\nOnly 4 spots left this week. DM us to grab yours.",tags:["#MassageHarrisburg","#SpaDay","#SelfCare","#WellnessPA"],likes:"730",comments:"55",shares:"140"},
+      {platform:"fb",pLabel:"Facebook",emoji:"🎀",cap:"Mother's Day Gift Alert! 🌸\n\nTreat Mom to a luxury spa package — starting at just $89. Gift cards available in-store and online.\n\nCall us: (717) 461-3210",tags:["#GiftIdeas","#MothersDay","#HarrisburgSpa"],likes:"523",comments:"67",shares:"108"},
+      {platform:"ig",pLabel:"Instagram",emoji:"💅",cap:"This season's most requested nail art 💅\n\nChrome powder + abstract florals = perfection. Our nail tech is accepting new clients — DM to book!",tags:["#NailArt","#HarrisburgNails","#ChromeNails"],likes:"980",comments:"74",shares:"166"},
+      {platform:"fb",pLabel:"Facebook",emoji:"⭐",cap:"\"I've been coming here for 2 years and I've never left disappointed. Jess does my color perfectly every time.\"\n— Amanda R. ⭐⭐⭐⭐⭐\n\nThank you Amanda 💜",tags:["#CustomerLove","#HarrisburgSalon","#TrueStory"],likes:"387",comments:"41",shares:"59"},
+      {platform:"goog",pLabel:"Google Business",emoji:"📍",cap:"💇‍♀️ Now booking for June!\n\nServices: Cuts, Color, Balayage, Keratin, Brow & Lash, Nails, Massage.\n\nBook online 24/7 or call (717) 461-3210.",tags:["#HarrisburgSalon","#BookNow"],likes:"—",comments:"—",shares:"Views: 2,210"}
+    ],
+    ba:[
+      {emoji:"📸",bCap:"New styles available! Call to book.",aCap:"🌟 Spring is HERE and so is your new look.\n\nWe just dropped 8 fresh cut + color combos for the season — from lived-in brunettes to bold coppers.\n\nSave your favorite, then DM us to book. Spots fill up FAST 🔥",bMet:["❤️ 9 likes","💬 0 comments","👁 76 reach"],aMet:["❤️ 930 likes","💬 72 comments","👁 5,100+ reach"]},
+      {emoji:"🎯",bCap:"Open Mon-Sat 9am-6pm",aCap:"📅 Here's how to get the most out of your visit:\n\n⏰ Book 2+ weeks ahead for weekend appointments\n💡 Ask about our First Visit Discount (20% off)\n💆 Add a scalp massage for just $15\n🎁 Gift cards available online 24/7\n\nYour best hair day starts here 👇",bMet:["❤️ 5 likes","💬 1 comment","📤 1 share"],aMet:["❤️ 478 likes","💬 44 comments","📤 88 shares"]}
+    ],
+    stats:[{icon:"👁️",val:"+290%",lbl:"Profile Reach",chg:"+290%",col:"purple"},{icon:"📅",val:"+68%",lbl:"Online Bookings",chg:"in 90 days",col:"green"},{icon:"📩",val:"38",lbl:"New DM Leads/mo",chg:"vs 4 before",col:"blue"},{icon:"🌟",val:"+18",lbl:"New Reviews",chg:"in 90 days",col:"orange"}],
+    chart:[{l:"Mo 1",h:28,b:6},{l:"Mo 2",h:54,b:7},{l:"Mo 3",h:88,b:7},{l:"Mo 4",h:128,b:8},{l:"Mo 5",h:180,b:8},{l:"Mo 6",h:244,b:9}]},
+  retail:{label:"Retail Shop",postsub:"A sample content week for your retail store",basub:"Here's what most retail shops post — and what we do instead.",resultssub:"Average results for Harrisburg retail clients",chartsub:"A Harrisburg boutique — social reach before vs. after 6 months with HCC",
+    posts:[
+      {platform:"ig",pLabel:"Instagram",emoji:"🛍️",cap:"New arrivals just dropped! 🎉\n\nOur spring collection is officially in-store and we are OBSESSED. These pieces won't last.\n\n📍 123 Market St, Harrisburg\n⏰ Open daily 10am–7pm",tags:["#HarrisburgBoutique","#NewArrivals","#ShopLocal","#SpringFashion"],likes:"920",comments:"61",shares:"155"},
+      {platform:"ig",pLabel:"Instagram",emoji:"✨",cap:"\"I get compliments on this jacket literally every time I wear it\" 🙏\n\nReal quality. Real style. Real Harrisburg.\n\nShop the look 👇 link in bio.",tags:["#ShopSmall","#HarrisburgFashion","#StyleInspo"],likes:"640",comments:"48",shares:"97"},
+      {platform:"fb",pLabel:"Facebook",emoji:"🏷️",cap:"Flash Sale Alert! ⚡\n\nFor the next 48 hours — 25% off ALL accessories. In-store only. This weekend.\n\nShare with a friend who needs a wardrobe upgrade 👇",tags:["#HarrisburgSale","#ShopLocal","#FlashSale"],likes:"445",comments:"58",shares:"134"},
+      {platform:"ig",pLabel:"Instagram",emoji:"🎁",cap:"Gift wrapping season is here 🎀\n\nAll purchases over $50 include complimentary gift wrapping through the holidays.\n\nCome in or shop online.",tags:["#GiftIdeas","#HarrisburgPA","#HolidayShopping"],likes:"511",comments:"39",shares:"76"},
+      {platform:"fb",pLabel:"Facebook",emoji:"⭐",cap:"\"Worth every penny. I drove 45 minutes to shop here and I'd do it again.\"\n— Tyler M. ⭐⭐⭐⭐⭐\n\nThat's what community is all about 💜",tags:["#ShopLocal","#CustomerReview","#Harrisburg"],likes:"367",comments:"33",shares:"55"},
+      {platform:"goog",pLabel:"Google Business",emoji:"📍",cap:"🛍️ Now offering curbside pickup!\n\nCall (717) 461-3210 to place your order — we'll have it ready in 30 minutes.",tags:["#HarrisburgRetail","#CurbsidePickup"],likes:"—",comments:"—",shares:"Views: 1,580"}
+    ],
+    ba:[
+      {emoji:"📸",bCap:"New products in! Come check us out.",aCap:"🛍️ JUST IN: The bags everyone's been asking about.\n\nWe got 12 of these Italian leather crossbodies and they WILL sell out.\n\nFirst come, first served. In-store only.\n📍 123 Market St, Harrisburg | Open 10am today",bMet:["❤️ 8 likes","💬 0 comments","👁 95 reach"],aMet:["❤️ 760 likes","💬 57 comments","👁 4,800+ reach"]},
+      {emoji:"🎯",bCap:"20% off this weekend only",aCap:"⚡ 48-HOUR SALE — Ends Sunday midnight\n\n✅ 20% off sitewide (use code HBURG20)\n✅ Free shipping over $75\n✅ Free gift wrap on all orders\n\n🛒 Link in bio — don't sleep on this.",bMet:["❤️ 14 likes","💬 2 comments","📤 3 shares"],aMet:["❤️ 610 likes","💬 49 comments","📤 118 shares"]}
+    ],
+    stats:[{icon:"👁️",val:"+340%",lbl:"Profile Reach",chg:"+340%",col:"purple"},{icon:"🛒",val:"+55%",lbl:"Website Traffic",chg:"from social",col:"green"},{icon:"📩",val:"29",lbl:"DM Orders/mo",chg:"vs 2 before",col:"blue"},{icon:"🌟",val:"+14",lbl:"New Reviews",chg:"in 90 days",col:"orange"}],
+    chart:[{l:"Mo 1",h:40,b:10},{l:"Mo 2",h:72,b:11},{l:"Mo 3",h:108,b:11},{l:"Mo 4",h:155,b:12},{l:"Mo 5",h:210,b:12},{l:"Mo 6",h:280,b:13}]},
+  fitness:{label:"Gym / Fitness",postsub:"A sample content week for your gym or fitness studio",basub:"Here's what most gyms post — and what we create instead.",resultssub:"Average results for Harrisburg fitness clients",chartsub:"A Harrisburg gym — member leads & follower growth before vs. after HCC",
+    posts:[
+      {platform:"ig",pLabel:"Instagram",emoji:"💪",cap:"5am crew — this one's for you. 🌅\n\nThere's something different about people who show up before the city wakes up. Consistent. Focused. Unstoppable.\n\nTag your 5am partner 👇",tags:["#HarrisburgGym","#MorningWorkout","#FitnessPA","#GrindTime"],likes:"1.1K",comments:"97",shares:"213"},
+      {platform:"ig",pLabel:"Instagram",emoji:"🏋️",cap:"Client transformation — 12 weeks, zero shortcuts. 🔥\n\n[Left] Week 1 | [Right] Week 12\n\nCoached by our trainer Mike. Ready to start? DM us.",tags:["#Transformation","#PersonalTraining","#Harrisburg","#FitnessResults"],likes:"2.3K",comments:"148",shares:"390"},
+      {platform:"fb",pLabel:"Facebook",emoji:"🆓",cap:"Harrisburg — your FREE week is waiting. 🎁\n\nWe're opening up 10 free trial memberships this month. No credit card required.\n\nComment \"FREE\" below and we'll DM you the link.",tags:["#FreeGymTrial","#HarrisburgFitness","#JoinNow"],likes:"678",comments:"112",shares:"188"},
+      {platform:"ig",pLabel:"Instagram",emoji:"🥗",cap:"Gains start in the kitchen 🥗\n\nHere's our trainer's go-to post-workout meal — high protein, easy to prep, under 500 calories.\n\nSave this for your next meal prep Sunday 🔖",tags:["#MealPrep","#FitnessFood","#ProteinMeal","#HealthyEating"],likes:"755",comments:"66",shares:"170"},
+      {platform:"fb",pLabel:"Facebook",emoji:"⭐",cap:"\"I lost 31 lbs in 4 months. I had tried everything before this — this program actually works.\"\n— James K. ⭐⭐⭐⭐⭐\n\nJames — you did the work. We just showed you the path 💪",tags:["#WeightLoss","#HarrisburgFitness","#RealResults"],likes:"891",comments:"103",shares:"220"},
+      {platform:"goog",pLabel:"Google Business",emoji:"📍",cap:"🏋️ Gym memberships from $39/mo\n\nOpen 24/7 | Personal training available | Group classes daily\n\nCall (717) 461-3210 or stop in for a free tour.",tags:["#GymHarrisburg","#PersonalTrainer"],likes:"—",comments:"—",shares:"Views: 2,980"}
+    ],
+    ba:[
+      {emoji:"📸",bCap:"New equipment just arrived! Come check it out.",aCap:"👀 We just installed 12 new cable stations and the members are LOSING IT.\n\nMore cable options = more exercises = better results.\n\nStop by today — we're open 24/7. Tag a gym buddy who needs to see this ⬇️",bMet:["❤️ 11 likes","💬 1 comment","👁 110 reach"],aMet:["❤️ 890 likes","💬 78 comments","👁 6,200+ reach"]},
+      {emoji:"🎯",bCap:"Summer special — sign up now",aCap:"☀️ SUMMER BODY CHALLENGE — Starts June 1st\n\n8-week program | 3x/week coaching | Nutrition plan included\n\nPrize for most improved: Free 6-month membership 🏆\n\nOnly 15 spots. 9 already gone.\nDM us NOW to lock yours in.",bMet:["❤️ 16 likes","💬 3 comments","📤 4 shares"],aMet:["❤️ 1.1K likes","💬 94 comments","📤 247 shares"]}
+    ],
+    stats:[{icon:"👁️",val:"+420%",lbl:"Profile Reach",chg:"+420%",col:"purple"},{icon:"🆔",val:"+73%",lbl:"Trial Sign-Ups",chg:"in 90 days",col:"green"},{icon:"📩",val:"61",lbl:"DM Inquiries/mo",chg:"vs 5 before",col:"blue"},{icon:"🌟",val:"+31",lbl:"New Reviews",chg:"in 90 days",col:"orange"}],
+    chart:[{l:"Mo 1",h:50,b:12},{l:"Mo 2",h:90,b:13},{l:"Mo 3",h:140,b:14},{l:"Mo 4",h:195,b:14},{l:"Mo 5",h:260,b:15},{l:"Mo 6",h:340,b:16}]},
+  realestate:{label:"Real Estate",postsub:"A sample content week for your real estate business",basub:"Here's what most agents post — and what top performers do instead.",resultssub:"Average results for Harrisburg real estate clients",chartsub:"A Harrisburg realtor — follower & lead growth before vs. after HCC",
+    posts:[
+      {platform:"ig",pLabel:"Instagram",emoji:"🏡",cap:"JUST LISTED ✨\n\n4 bed | 3 bath | 2,200 sqft | Susquehanna views\nAsking: $389,000\n\nShowing this weekend — DM me to schedule.\n\n📍 Harrisburg, PA",tags:["#HarrisburgRealEstate","#JustListed","#HomeForSale","#PAHomes"],likes:"810",comments:"54",shares:"130"},
+      {platform:"ig",pLabel:"Instagram",emoji:"🔑",cap:"They said \"we'll never afford a home in this market.\"\n\nThey closed last Thursday 🔑\n\nFirst-time buyers, 3% down, under asking.\n\n(Congrats T + K — you deserve it) 🎉",tags:["#FirstTimeHomeBuyer","#HarrisburgHomes","#JustClosed","#RealtorPA"],likes:"1.5K",comments:"112",shares:"280"},
+      {platform:"fb",pLabel:"Facebook",emoji:"📊",cap:"Harrisburg Market Update — May 2026 📊\n\nAvg sale price: $312,000 (↑8% YOY)\nDays on market: 14 avg\nHomes selling over asking: 62%\n\nThinking about selling? DM me for a free home valuation.",tags:["#HarrisburgRealEstate","#MarketUpdate","#HomeSelling"],likes:"390",comments:"44",shares:"88"},
+      {platform:"ig",pLabel:"Instagram",emoji:"🎥",cap:"Interior tour video dropping tonight 🎥\n\nThis Victorian in Midtown has the original hardwood floors, renovated kitchen, and a backyard that'll make you forget you're in the city. $299K.",tags:["#HarrisburgHomes","#HomeToursPA","#Midtown"],likes:"645",comments:"49",shares:"101"},
+      {platform:"fb",pLabel:"Facebook",emoji:"⭐",cap:"\"Robin found us the perfect home in 3 weeks flat. If you're buying in Harrisburg, he's your guy.\"\n— Dave & Sheila P. ⭐⭐⭐⭐⭐\n\nSo grateful for clients who trust the process 💜",tags:["#RealtorReview","#HarrisburgPA","#TrustYourAgent"],likes:"430",comments:"47",shares:"65"},
+      {platform:"goog",pLabel:"Google Business",emoji:"📍",cap:"🏡 Free Home Valuations — No Obligation\n\nCurious what your Harrisburg home is worth? I'll give you a full CMA within 48 hours.\n\nCall (717) 461-3210 or DM to get started.",tags:["#HomeValue","#HarrisburgRealtor"],likes:"—",comments:"—",shares:"Views: 3,240"}
+    ],
+    ba:[
+      {emoji:"📸",bCap:"3 bed 2 bath house for sale call me",aCap:"✨ THE ONE YOU'VE BEEN WAITING FOR\n\n3 bed | 2 bath | Corner lot | Updated kitchen\nMidtown Harrisburg | $274,900\n\nWarm hardwood floors. Walk to everything. That covered porch is calling your name.\n\nShowing this Saturday — only 6 spots left. DM me to reserve yours 🔑",bMet:["❤️ 4 likes","💬 0 comments","👁 55 reach"],aMet:["❤️ 810 likes","💬 54 comments","👁 5,600+ reach"]},
+      {emoji:"🎯",bCap:"Market is hot! Now is a good time to buy.",aCap:"📈 Harrisburg homes are selling in 14 days on average right now.\n\nIf you're waiting for prices to drop… they haven't. And they probably won't.\n\nThe best time to buy was last year. The next best time is right now.\n\nDM me for a free buyer consultation — no pressure, just clarity.",bMet:["❤️ 7 likes","💬 1 comment","📤 2 shares"],aMet:["❤️ 560 likes","💬 61 comments","📤 140 shares"]}
+    ],
+    stats:[{icon:"👁️",val:"+380%",lbl:"Profile Reach",chg:"+380%",col:"purple"},{icon:"🏠",val:"+88%",lbl:"Listing Inquiries",chg:"in 90 days",col:"green"},{icon:"📩",val:"52",lbl:"Buyer DM Leads/mo",chg:"vs 4 before",col:"blue"},{icon:"🌟",val:"+26",lbl:"New Reviews",chg:"in 90 days",col:"orange"}],
+    chart:[{l:"Mo 1",h:45,b:9},{l:"Mo 2",h:82,b:10},{l:"Mo 3",h:125,b:10},{l:"Mo 4",h:180,b:11},{l:"Mo 5",h:240,b:11},{l:"Mo 6",h:315,b:12}]},
+  dental:{label:"Dental / Medical",postsub:"A sample content week for your dental or medical practice",basub:"Here's what most practices post — and what we do instead.",resultssub:"Average results for Harrisburg dental & medical clients",chartsub:"A Harrisburg dental practice — new patient inquiries before vs. after HCC",
+    posts:[
+      {platform:"ig",pLabel:"Instagram",emoji:"😁",cap:"Before & after teeth whitening ✨\n\n8 shades brighter in one session. No sensitivity. No trays to take home.\n\nComplimentary consultations — click the link in bio to book yours.",tags:["#HarrisburgDentist","#TeethWhitening","#SmileTransformation","#DentalPA"],likes:"720",comments:"58",shares:"143"},
+      {platform:"ig",pLabel:"Instagram",emoji:"🦷",cap:"Fun fact: most dental anxiety comes from the unknown 🧠\n\nAt our practice, we walk you through every step before we start. No surprises. No judgment.\n\nWe've helped over 400 Harrisburg patients overcome dental anxiety. DM us.",tags:["#DentalAnxiety","#HarrisburgDental","#ComfortableDentistry"],likes:"490",comments:"43",shares:"94"},
+      {platform:"fb",pLabel:"Facebook",emoji:"📋",cap:"New Patients Welcome! 🙌\n\n✅ Flexible hours\n✅ Same-day emergency appointments\n✅ Financing available (0% interest)\n\nCall (717) 461-3210 or book online.",tags:["#NewPatients","#HarrisburgDentist","#FamilyDentistry"],likes:"355",comments:"38",shares:"71"},
+      {platform:"ig",pLabel:"Instagram",emoji:"👶",cap:"When's the right age for a child's first dental visit? 🤔\n\nAnswer: by age 1, or when the first tooth appears.\n\nEarly visits build great habits for life. Here's what to expect at your child's first appointment 👇",tags:["#PediatricDentistry","#KidsDentist","#HarrisburgParents"],likes:"612",comments:"47",shares:"188"},
+      {platform:"fb",pLabel:"Facebook",emoji:"⭐",cap:"\"I've been terrified of the dentist my whole life. These people changed that. Completely changed that.\"\n— Marcus D. ⭐⭐⭐⭐⭐\n\nThis is why we do this work 💜",tags:["#PatientStory","#HarrisburgDentist","#RealReview"],likes:"590",comments:"61",shares:"112"},
+      {platform:"goog",pLabel:"Google Business",emoji:"📍",cap:"🦷 Same-Day Emergency Appointments Available\n\nToothache? Broken crown? Call us first.\n\n(717) 461-3210 — we'll fit you in today.",tags:["#EmergencyDentist","#HarrisburgDental"],likes:"—",comments:"—",shares:"Views: 1,920"}
+    ],
+    ba:[
+      {emoji:"📸",bCap:"We offer dental cleanings and checkups.",aCap:"😁 Your next cleaning could change more than your teeth.\n\nRegular check-ups catch problems early — saving you thousands down the road.\n\nWe're accepting new patients! First visit includes:\n✅ Full exam\n✅ X-rays\n✅ Custom treatment plan\n✅ Zero pressure\n\nBook in 60 seconds — link in bio 👇",bMet:["❤️ 6 likes","💬 0 comments","👁 72 reach"],aMet:["❤️ 650 likes","💬 49 comments","👁 4,400+ reach"]},
+      {emoji:"🎯",bCap:"Invisalign available at our practice!",aCap:"🦷 Straight teeth. No metal. No one even notices.\n\nInvisalign at our Harrisburg practice starts at $99/mo with financing.\n\nAverage treatment: 12 months. Average confidence boost: priceless.\n\nFree consult this month. DM us.",bMet:["❤️ 10 likes","💬 1 comment","📤 2 shares"],aMet:["❤️ 534 likes","💬 55 comments","📤 122 shares"]}
+    ],
+    stats:[{icon:"👁️",val:"+260%",lbl:"Profile Reach",chg:"+260%",col:"purple"},{icon:"📅",val:"+61%",lbl:"Online Bookings",chg:"in 90 days",col:"green"},{icon:"📩",val:"33",lbl:"New Patient DMs/mo",chg:"vs 3 before",col:"blue"},{icon:"🌟",val:"+20",lbl:"New Reviews",chg:"in 90 days",col:"orange"}],
+    chart:[{l:"Mo 1",h:30,b:7},{l:"Mo 2",h:55,b:8},{l:"Mo 3",h:85,b:8},{l:"Mo 4",h:120,b:9},{l:"Mo 5",h:162,b:9},{l:"Mo 6",h:214,b:10}]}
+};
+let demoBiz='restaurant';
+function demoSelectBiz(biz,btn){
+  demoBiz=biz;
+  document.querySelectorAll('.dm-biz-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  demoRenderAll();
+}
+function demoSwitchTab(tab,btn){
+  document.querySelectorAll('.dm-tbtn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.dm-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('dm-panel-'+tab).classList.add('active');
+}
+function demoPlatformIcon(p){
+  if(p==='ig')return '<div class="dm-pi dm-pi-ig">IG</div>';
+  if(p==='fb')return '<div class="dm-pi dm-pi-fb">f</div>';
+  return '<div class="dm-pi dm-pi-g">G</div>';
+}
+function demoRenderAll(){demoRenderPosts();demoRenderBA();demoRenderResults();}
+function demoRenderPosts(){
+  const d=DEMO_DATA[demoBiz];
+  document.getElementById('dm-posts-sub').textContent=d.postsub;
+  document.getElementById('dm-posts-grid').innerHTML=d.posts.map(p=>`
+    <div class="dm-post-card">
+      <div class="dm-post-img">${p.emoji}</div>
+      <div class="dm-post-plat">${demoPlatformIcon(p.platform)}<span class="dm-plat-name">${p.pLabel}</span></div>
+      <div class="dm-post-body">
+        <div class="dm-post-cap">${p.cap.replace(/\n/g,'<br>')}</div>
+        <div class="dm-post-tags">${p.tags.map(t=>`<span class="dm-post-tag">${t}</span>`).join('')}</div>
+        <div class="dm-post-stats"><span class="dm-post-stat">❤️ <strong>${p.likes}</strong></span><span class="dm-post-stat">💬 <strong>${p.comments}</strong></span><span class="dm-post-stat">📤 <strong>${p.shares}</strong></span></div>
+      </div>
+    </div>`).join('');
+}
+function demoRenderBA(){
+  const d=DEMO_DATA[demoBiz];
+  document.getElementById('dm-ba-sub').textContent=d.basub;
+  document.getElementById('dm-ba-pairs').innerHTML=d.ba.map(pair=>`
+    <div class="dm-ba-pair">
+      <div class="dm-ba-card dm-bef">
+        <div class="dm-ba-hdr">❌ Before — Typical ${d.label} Post</div>
+        <div class="dm-ba-content">
+          <div class="dm-ba-img">${pair.emoji}</div>
+          <div class="dm-ba-cap">${pair.bCap}</div>
+          <div class="dm-ba-metrics">${pair.bMet.map(m=>`<div class="dm-ba-metric">${m}</div>`).join('')}</div>
+        </div>
+      </div>
+      <div class="dm-ba-card dm-aft">
+        <div class="dm-ba-hdr">✅ After — Harrisburg Content Co.</div>
+        <div class="dm-ba-content">
+          <div class="dm-ba-img">${pair.emoji}</div>
+          <div class="dm-ba-cap">${pair.aCap.replace(/\n/g,'<br>')}</div>
+          <div class="dm-ba-metrics">${pair.aMet.map(m=>`<div class="dm-ba-metric">${m}</div>`).join('')}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function demoRenderResults(){
+  const d=DEMO_DATA[demoBiz];
+  document.getElementById('dm-results-sub').textContent=d.resultssub;
+  document.getElementById('dm-chart-sub').textContent=d.chartsub;
+  document.getElementById('dm-stats-grid').innerHTML=d.stats.map(s=>`
+    <div class="dm-stat-card ${s.col}">
+      <div class="dm-stat-icon">${s.icon}</div>
+      <div class="dm-stat-val">${s.val}</div>
+      <div class="dm-stat-lbl">${s.lbl}</div>
+      <span class="dm-stat-chg">↑ ${s.chg}</span>
+    </div>`).join('');
+  const maxV=Math.max(...d.chart.map(c=>c.h));
+  document.getElementById('dm-chart-bars').innerHTML=d.chart.map(c=>`
+    <div class="dm-chart-col">
+      <div class="dm-bar-val">+${c.h}%</div>
+      <div style="display:flex;gap:3px;align-items:flex-end;width:100%">
+        <div class="dm-chart-bar dm-hcc-bar" style="height:${Math.round(c.h/maxV*120)}px;flex:1"></div>
+        <div class="dm-chart-bar dm-bef-bar" style="height:${Math.round(c.b/maxV*120)}px;flex:1"></div>
+      </div>
+      <div class="dm-bar-lbl">${c.l}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// ONBOARDING
+// ══════════════════════════════════════════
+function onbTab(tab,btn){
+  document.querySelectorAll('.ob-tc').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ob-tbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ob-'+tab).classList.add('active');
+  btn.classList.add('active');
+}
+function onbCopy(id,btn){
+  navigator.clipboard.writeText(document.getElementById(id).innerText);
+  btn.textContent='Copied!';btn.classList.add('copied');
+  setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);
+}
+
+// ══════════════════════════════════════════
+// WORKFLOW
+// ══════════════════════════════════════════
+function wfCopy(id,btn){
+  navigator.clipboard.writeText(document.getElementById(id).innerText);
+  btn.textContent='Copied!';btn.classList.add('copied');
+  setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);
+}
+
+// ══════════════════════════════════════════
+// REFUND TRACKER
+// ══════════════════════════════════════════
+const RF_KEY='hcc_refunds_v1';
+let rfData=[];let rfEditId=null;
+function rfLoad(){try{rfData=JSON.parse(localStorage.getItem(RF_KEY))||[];}catch(e){rfData=[];}}
+function rfSave(){localStorage.setItem(RF_KEY,JSON.stringify(rfData));}
+function rfFmt(n){return '$'+parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function rfEsc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function rfStatusBadge(s){const m={Pending:'rf-bdg-pend',Processing:'rf-bdg-proc',Completed:'rf-bdg-comp',Denied:'rf-bdg-deny'};return `<span class="rf-bdg ${m[s]||'rf-bdg-pend'}">${s}</span>`;}
+function rfUpdateStats(){
+  const total=rfData.length;
+  const totalAmt=rfData.reduce((a,r)=>a+(parseFloat(r.amount)||0),0);
+  const pending=rfData.filter(r=>r.status==='Pending').length;
+  const completed=rfData.filter(r=>r.status==='Completed').length;
+  const now=new Date();
+  const tmAmt=rfData.filter(r=>{const d=new Date(r.reqdate);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).reduce((a,r)=>a+(parseFloat(r.amount)||0),0);
+  document.getElementById('rf-stat-total').textContent=total;
+  document.getElementById('rf-stat-amount').textContent=rfFmt(totalAmt);
+  document.getElementById('rf-stat-pending').textContent=pending;
+  document.getElementById('rf-stat-completed').textContent=completed;
+  document.getElementById('rf-stat-thismonth').textContent=rfFmt(tmAmt);
+}
+function rfRenderTable(){
+  const search=(document.getElementById('rf-search').value||'').toLowerCase();
+  const fS=document.getElementById('rf-filterStatus').value;
+  const fP=document.getElementById('rf-filterPlan').value;
+  const filtered=rfData.filter(r=>{
+    const ms=!search||(r.name||'').toLowerCase().includes(search)||(r.biz||'').toLowerCase().includes(search)||(r.email||'').toLowerCase().includes(search)||(r.stripe||'').toLowerCase().includes(search);
+    return ms&&(!fS||r.status===fS)&&(!fP||(r.plan||'').includes(fP));
+  });
+  const tbody=document.getElementById('rf-tableBody');
+  const empty=document.getElementById('rf-emptyState');
+  if(!filtered.length){tbody.innerHTML='';empty.style.display='block';rfUpdateStats();return;}
+  empty.style.display='none';
+  tbody.innerHTML=filtered.map((r,i)=>`
+    <tr>
+      <td style="color:var(--muted);font-size:11px;">${filtered.length-i}</td>
+      <td><div class="rf-tdn">${rfEsc(r.name)}</div><div class="rf-tdb">${rfEsc(r.biz)}${r.email?' · '+rfEsc(r.email):''}</div></td>
+      <td>${rfEsc(r.plan||'—')}</td>
+      <td><span class="rf-amt">${rfFmt(r.amount)}</span><br/><span style="font-size:10px;color:var(--muted);">${rfEsc(r.type||'')}</span></td>
+      <td style="max-width:140px;font-size:12px;">${rfEsc(r.reason||'—')}</td>
+      <td style="font-size:12px;white-space:nowrap;">${r.reqdate||'—'}<br/><span style="color:var(--muted);font-size:10px;">${r.procdate?'Processed: '+r.procdate:''}</span></td>
+      <td>${rfStatusBadge(r.status)}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:120px;word-break:break-all;">${r.stripe||'—'}</td>
+      <td><div style="display:flex;gap:5px;flex-wrap:wrap;">
+        <button class="rf-abtn rf-edit" onclick="rfOpenModal('${r.id}')">Edit</button>
+        ${r.stripe?`<button class="rf-abtn rf-stripe" onclick="rfOpenStripe('${r.stripe}')">Stripe</button>`:''}
+        <button class="rf-abtn rf-del" onclick="rfDeleteRefund('${r.id}')">Del</button>
+      </div></td>
+    </tr>`).join('');
+  rfUpdateStats();
+}
+function rfOpenModal(id){
+  rfEditId=id||null;
+  document.getElementById('rf-modalTitle').textContent=rfEditId?'Edit Refund':'Log New Refund';
+  const r=rfEditId?rfData.find(x=>x.id===rfEditId):{};
+  ['name','biz','email','phone','plan','amount','type','reason','status','stripe','procdate','notes'].forEach(f=>{const el=document.getElementById('rf-m-'+f);if(el)el.value=r[f]||''});
+  document.getElementById('rf-m-reqdate').value=r.reqdate||new Date().toISOString().split('T')[0];
+  if(!rfEditId)document.getElementById('rf-m-status').value='Pending';
+  document.getElementById('rf-overlay').classList.add('open');
+}
+function rfCloseModal(){document.getElementById('rf-overlay').classList.remove('open');}
+function rfSaveRefund(){
+  const name=document.getElementById('rf-m-name').value.trim();
+  const biz=document.getElementById('rf-m-biz').value.trim();
+  const amount=document.getElementById('rf-m-amount').value;
+  const plan=document.getElementById('rf-m-plan').value;
+  const reqdate=document.getElementById('rf-m-reqdate').value;
+  const reason=document.getElementById('rf-m-reason').value;
+  const type=document.getElementById('rf-m-type').value;
+  if(!name||!biz||!amount||!plan||!reqdate||!reason||!type){hccToast('Please fill in all required fields.','red');return;}
+  const entry={id:rfEditId||'r_'+Date.now(),name,biz,
+    email:document.getElementById('rf-m-email').value.trim(),
+    phone:document.getElementById('rf-m-phone').value.trim(),
+    plan,amount:parseFloat(amount),type,reqdate,reason,
+    status:document.getElementById('rf-m-status').value,
+    stripe:document.getElementById('rf-m-stripe').value.trim(),
+    procdate:document.getElementById('rf-m-procdate').value,
+    notes:document.getElementById('rf-m-notes').value.trim(),
+    updated:new Date().toISOString()};
+  if(rfEditId){const idx=rfData.findIndex(x=>x.id===rfEditId);if(idx>-1)rfData[idx]=entry;}
+  else rfData.unshift(entry);
+  rfSave();rfCloseModal();rfRenderTable();
+  hccToast(rfEditId?'Refund updated.':'Refund logged!','green');
+}
+function rfDeleteRefund(id){
+  if(!confirm('Delete this refund record? This cannot be undone.'))return;
+  rfData=rfData.filter(r=>r.id!==id);rfSave();rfRenderTable();
+  hccToast('Deleted.','red');
+}
+function rfOpenStripe(id){
+  if(id.startsWith('re_'))window.open('https://dashboard.stripe.com/refunds/'+id,'_blank','noopener');
+  else window.open('https://dashboard.stripe.com/payments/'+id,'_blank','noopener');
+}
+function rfExportCSV(){
+  if(!rfData.length){hccToast('No refunds to export.','');return;}
+  const headers=['ID','Name','Business','Email','Phone','Plan','Amount','Type','Request Date','Reason','Status','Stripe ID','Processed Date','Notes'];
+  const rows=rfData.map(r=>[r.id,r.name,r.biz,r.email,r.phone,r.plan,r.amount,r.type,r.reqdate,r.reason,r.status,r.stripe,r.procdate,r.notes].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='HCC_Refunds_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+  hccToast('CSV exported!','green');
+}
+document.getElementById('rf-overlay').addEventListener('click',function(e){if(e.target===this)rfCloseModal();});
+
+// ══════════════════════════════════════════
+// REVENUE & TAX TRACKER
+// ══════════════════════════════════════════
+const TX_SK='hcc_tax_v2';
+let txData={income:[],expenses:[],qPaid:{},notes:{}};
+let txEditId=null,txModalType=null;
+function txLoad(){try{txData=JSON.parse(localStorage.getItem(TX_SK))||{income:[],expenses:[],qPaid:{},notes:{}};}catch(e){txData={income:[],expenses:[],qPaid:{},notes:{}};} txData.income=txData.income||[];txData.expenses=txData.expenses||[];txData.qPaid=txData.qPaid||{};txData.notes=txData.notes||{};}
+function txSave(){localStorage.setItem(TX_SK,JSON.stringify(txData));}
+function txId(){return 'e_'+Date.now()+'_'+Math.random().toString(36).slice(2);}
+function txFmt(n){return '$'+parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function txEsc(s){const d=document.createElement('div');d.appendChild(document.createTextNode(String(s||'')));return d.innerHTML;}
+function txGetYear(){return parseInt(document.getElementById('tx-yearSelect').value)||new Date().getFullYear();}
+function txByYear(arr){const y=txGetYear();return arr.filter(e=>e.date&&new Date(e.date).getFullYear()===y);}
+function txCalcTotals(){
+  const inc=txByYear(txData.income).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+  const exp=txByYear(txData.expenses).filter(e=>e.deductible).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+  const totalExp=txByYear(txData.expenses).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+  const profit=inc-exp;
+  const seTax=Math.max(0,profit*0.9235*0.153);
+  const fedTax=Math.max(0,(profit-seTax/2)*0.22);
+  const stateTax=Math.max(0,profit*0.0507);
+  return{inc,exp,totalExp,profit,seTax,fedTax,stateTax,totalTax:seTax+fedTax+stateTax};
+}
+function txInitYearSelect(){
+  const sel=document.getElementById('tx-yearSelect');
+  const cur=new Date().getFullYear();sel.innerHTML='';
+  for(let y=cur+1;y>=cur-3;y--){const o=document.createElement('option');o.value=y;o.textContent=y+(y===cur?' (Current)':'');sel.appendChild(o);}
+  sel.value=cur;
+}
+const TX_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function txPopMonths(selId){
+  const sel=document.getElementById(selId);sel.innerHTML='<option value="">All Months</option>';
+  TX_MONTHS.forEach((m,i)=>{const o=document.createElement('option');o.value=i;o.textContent=m;sel.appendChild(o);});
+}
+function txOnYearChange(){txRenderAll();}
+function txRenderDashboard(){
+  const{inc,exp,profit,totalTax}=txCalcTotals();
+  document.getElementById('tx-summaryCards').innerHTML=`
+    <div class="tx-scard inc"><div class="tx-slbl">Total Revenue</div><div class="tx-sval">${txFmt(inc)}</div><div class="tx-ssub">${txByYear(txData.income).length} payments</div></div>
+    <div class="tx-scard exp"><div class="tx-slbl">Deductible Expenses</div><div class="tx-sval">${txFmt(exp)}</div><div class="tx-ssub">${txByYear(txData.expenses).filter(e=>e.deductible).length} items</div></div>
+    <div class="tx-scard prf"><div class="tx-slbl">Net Profit</div><div class="tx-sval">${txFmt(profit)}</div><div class="tx-ssub">Revenue minus deductibles</div></div>
+    <div class="tx-scard tax"><div class="tx-slbl">Est. Tax Liability</div><div class="tx-sval">${txFmt(totalTax)}</div><div class="tx-ssub">Federal + SE + PA state</div></div>
+    <div class="tx-scard" style="border-color:#20b2aa;"><div class="tx-slbl">Set Aside (30%)</div><div class="tx-sval" style="color:#20b2aa;">${txFmt(inc*0.30)}</div><div class="tx-ssub">Recommended tax reserve</div></div>
+    <div class="tx-scard" style="border-color:#888;"><div class="tx-slbl">Take-Home (est.)</div><div class="tx-sval" style="color:#333;">${txFmt(Math.max(0,profit-totalTax))}</div><div class="tx-ssub">After all taxes</div></div>`;
+  const r5i=[...txByYear(txData.income)].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  const r5e=[...txByYear(txData.expenses)].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  document.getElementById('tx-recentIncome').innerHTML=r5i.length?r5i.map(e=>`<tr><td style="font-size:11px;color:var(--muted);">${e.date}</td><td style="font-weight:600;">${txEsc(e.client)}</td><td style="color:var(--green);font-weight:700;">${txFmt(e.amount)}</td></tr>`).join(''):'<tr class="tx-erow"><td colspan="3">No income yet</td></tr>';
+  document.getElementById('tx-recentExpenses').innerHTML=r5e.length?r5e.map(e=>`<tr><td style="font-size:11px;color:var(--muted);">${e.date}</td><td style="font-weight:600;">${txEsc(e.desc)}</td><td style="color:var(--coral);font-weight:700;">${txFmt(e.amount)}</td></tr>`).join(''):'<tr class="tx-erow"><td colspan="3">No expenses yet</td></tr>';
+}
+function txRenderIncome(){
+  const search=(document.getElementById('tx-incomeSearch').value||'').toLowerCase();
+  const month=document.getElementById('tx-incomeMonth').value;
+  const rows=txByYear(txData.income).filter(e=>{
+    const ms=!search||(e.client||'').toLowerCase().includes(search)||(e.desc||'').toLowerCase().includes(search);
+    const mm=month===''||new Date(e.date).getMonth()==parseInt(month);
+    return ms&&mm;
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('tx-incomeTable').innerHTML=rows.length?rows.map((e,i)=>`
+    <tr>
+      <td style="color:var(--muted);font-size:10px;">${rows.length-i}</td>
+      <td style="font-size:11px;white-space:nowrap;">${e.date}</td>
+      <td style="font-weight:700;">${txEsc(e.client)}</td>
+      <td><span class="tx-cbdg tx-inc-bdg">${txEsc(e.plan||'—')}</span></td>
+      <td style="font-size:11px;color:var(--muted);">${txEsc(e.desc||'')}</td>
+      <td style="color:var(--green);font-weight:800;">${txFmt(e.amount)}</td>
+      <td style="font-size:11px;">${txEsc(e.method||'Stripe')}</td>
+      <td style="font-size:10px;color:var(--muted);max-width:110px;word-break:break-all;">${txEsc(e.stripe||'—')}</td>
+      <td><button class="tx-abtn tx-aedit" onclick="txEditEntry('income','${e.id}')">Edit</button><button class="tx-abtn tx-adel" onclick="txDelEntry('income','${e.id}')">Del</button></td>
+    </tr>`).join(''):'<tr class="tx-erow"><td colspan="9">No income logged yet. Click "+ Income" to add.</td></tr>';
+}
+function txRenderExpenses(){
+  const search=(document.getElementById('tx-expSearch').value||'').toLowerCase();
+  const cat=document.getElementById('tx-expCategory').value;
+  const rows=txByYear(txData.expenses).filter(e=>{
+    const ms=!search||(e.desc||'').toLowerCase().includes(search)||(e.vendor||'').toLowerCase().includes(search);
+    return ms&&(!cat||e.category===cat);
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('tx-expTable').innerHTML=rows.length?rows.map((e,i)=>`
+    <tr>
+      <td style="color:var(--muted);font-size:10px;">${rows.length-i}</td>
+      <td style="font-size:11px;white-space:nowrap;">${e.date}</td>
+      <td style="font-weight:700;">${txEsc(e.desc)}<br/><span style="font-size:10px;color:var(--muted);">${txEsc(e.vendor||'')}</span></td>
+      <td><span class="tx-cbdg tx-exp-bdg">${txEsc(e.category||'Other')}</span></td>
+      <td style="color:var(--coral);font-weight:800;">${txFmt(e.amount)}</td>
+      <td>${e.deductible?'<span class="tx-cbdg tx-ded-bdg">✓ Yes</span>':'<span style="color:var(--muted);font-size:10px;">No</span>'}</td>
+      <td style="font-size:11px;">${e.receipt?'📎 Yes':'—'}</td>
+      <td><button class="tx-abtn tx-aedit" onclick="txEditEntry('expense','${e.id}')">Edit</button><button class="tx-abtn tx-adel" onclick="txDelEntry('expense','${e.id}')">Del</button></td>
+    </tr>`).join(''):'<tr class="tx-erow"><td colspan="8">No expenses logged yet. Click "+ Expense" to add.</td></tr>';
+}
+const TX_QUARTERS=[{q:'Q1',months:[0,1,2],label:'Jan – Mar',pay:'April 15'},{q:'Q2',months:[3,4,5],label:'Apr – Jun',pay:'June 16'},{q:'Q3',months:[6,7,8],label:'Jul – Sep',pay:'Sept 15'},{q:'Q4',months:[9,10,11],label:'Oct – Dec',pay:'Jan 15 next year'}];
+function txRenderQuarterly(){
+  const y=txGetYear();
+  document.getElementById('tx-quarterCards').innerHTML=TX_QUARTERS.map(q=>{
+    const qInc=txData.income.filter(e=>e.date&&new Date(e.date).getFullYear()===y&&q.months.includes(new Date(e.date).getMonth())).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+    const qExp=txData.expenses.filter(e=>e.deductible&&e.date&&new Date(e.date).getFullYear()===y&&q.months.includes(new Date(e.date).getMonth())).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+    const qProfit=Math.max(0,qInc-qExp);const qEst=qProfit*0.30;
+    const paid=txData.qPaid[y+'_'+q.q];
+    return `<div class="tx-qcard">
+      <div class="tx-qtitle">${q.q} ${y}</div>
+      <div class="tx-qdates">${q.label}</div>
+      <span class="tx-qdue ${paid?'paid':'upcoming'}">${paid?'✅ Marked Paid':'Due: '+q.pay}</span>
+      <div class="tx-qamt">${txFmt(qEst)}</div>
+      <div class="tx-qsub">Est. 30% of ${txFmt(qProfit)} net</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;">Income: ${txFmt(qInc)} · Expenses: ${txFmt(qExp)}</div>
+      <button class="tx-qpaidbtn" style="background:${paid?'var(--red-light)':'var(--green-light)'};color:${paid?'var(--red)':'var(--green)'};" onclick="txToggleQPaid('${y}_${q.q}')">${paid?'Mark Unpaid':'Mark as Paid'}</button>
+    </div>`;
+  }).join('');
+  const{inc,exp,profit,seTax,fedTax,stateTax,totalTax}=txCalcTotals();
+  document.getElementById('tx-yearEndCalc').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;">
+      <div style="padding:12px;background:var(--gray);border-radius:8px;"><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;">Gross Revenue</div><div style="font-size:18px;font-weight:900;color:var(--green);margin-top:3px;">${txFmt(inc)}</div></div>
+      <div style="padding:12px;background:var(--gray);border-radius:8px;"><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;">Deductible Expenses</div><div style="font-size:18px;font-weight:900;color:var(--coral);margin-top:3px;">${txFmt(exp)}</div></div>
+      <div style="padding:12px;background:var(--gray);border-radius:8px;"><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;">Net Profit</div><div style="font-size:18px;font-weight:900;color:#635bff;margin-top:3px;">${txFmt(profit)}</div></div>
+      <div style="padding:12px;background:var(--gray);border-radius:8px;"><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;">SE Tax (15.3%)</div><div style="font-size:18px;font-weight:900;color:var(--yellow);margin-top:3px;">${txFmt(seTax)}</div></div>
+      <div style="padding:12px;background:var(--gray);border-radius:8px;"><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;">Federal Income Tax</div><div style="font-size:18px;font-weight:900;color:var(--yellow);margin-top:3px;">${txFmt(fedTax)}</div></div>
+      <div style="padding:12px;background:var(--gray);border-radius:8px;"><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;">PA + Local Tax</div><div style="font-size:18px;font-weight:900;color:var(--yellow);margin-top:3px;">${txFmt(stateTax)}</div></div>
+      <div style="padding:12px;background:var(--navy);border-radius:8px;grid-column:span 2;"><div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;">Total Estimated Tax Bill</div><div style="font-size:24px;font-weight:900;color:var(--coral);margin-top:3px;">${txFmt(totalTax)}</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:3px;">Confirm exact amounts with your CPA before filing</div></div>
+      <div style="padding:12px;background:var(--green-light);border-radius:8px;border:1px solid #a8dfc5;"><div style="font-size:10px;color:var(--green);font-weight:700;text-transform:uppercase;">Estimated Take-Home</div><div style="font-size:24px;font-weight:900;color:var(--green);margin-top:3px;">${txFmt(Math.max(0,profit-totalTax))}</div></div>
+    </div>`;
+}
+function txToggleQPaid(key){txData.qPaid[key]=!txData.qPaid[key];txSave();txRenderQuarterly();hccToast(txData.qPaid[key]?'Marked as paid ✅':'Marked as unpaid','green');}
+function txShowPanel(name,el){
+  document.querySelectorAll('#sec-tx .tx-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#sec-tx .tx-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tx-panel-'+name).classList.add('active');
+  el.classList.add('active');
+  if(name==='income')txRenderIncome();
+  if(name==='expenses')txRenderExpenses();
+  if(name==='quarterly')txRenderQuarterly();
+}
+function txOpenModal(type,id){
+  txModalType=type;txEditId=id||null;
+  const r=txEditId?(type==='income'?txData.income:txData.expenses).find(x=>x.id===txEditId):{};
+  document.getElementById('tx-modalTitle').textContent=txEditId?(type==='income'?'Edit Income':'Edit Expense'):(type==='income'?'Log Income':'Log Expense');
+  const today=new Date().toISOString().split('T')[0];
+  if(type==='income'){
+    document.getElementById('tx-modalFields').innerHTML=`
+      <div class="hcc-fg"><label>Date *</label><input type="date" id="tx-m-date" value="${r.date||today}"/></div>
+      <div class="hcc-fg"><label>Client Name *</label><input type="text" id="tx-m-client" value="${txEsc(r.client||'')}" placeholder="Mount Everest Cuisine" maxlength="100"/></div>
+      <div class="hcc-fg"><label>Plan</label><select id="tx-m-plan"><option value="">—</option><option ${r.plan==='Starter'?'selected':''}>Starter</option><option ${r.plan==='Growth'?'selected':''}>Growth</option><option ${r.plan==='Authority'?'selected':''}>Authority</option><option ${r.plan==='One-time'?'selected':''}>One-time</option></select></div>
+      <div class="hcc-fg"><label>Amount ($) *</label><input type="number" id="tx-m-amount" value="${r.amount||''}" placeholder="497.00" min="0" step="0.01"/></div>
+      <div class="hcc-fg"><label>Payment Method</label><select id="tx-m-method"><option ${r.method==='Stripe'?'selected':''}>Stripe</option><option ${r.method==='Cash'?'selected':''}>Cash</option><option ${r.method==='Check'?'selected':''}>Check</option><option ${r.method==='Zelle'?'selected':''}>Zelle</option><option ${r.method==='Other'?'selected':''}>Other</option></select></div>
+      <div class="hcc-fg"><label>Stripe Transaction ID</label><input type="text" id="tx-m-stripe" value="${txEsc(r.stripe||'')}" placeholder="ch_..." maxlength="100"/></div>
+      <div class="hcc-fg full"><label>Description / Notes</label><textarea id="tx-m-desc" placeholder="June content package...">${txEsc(r.desc||'')}</textarea></div>`;
+  }else{
+    document.getElementById('tx-modalFields').innerHTML=`
+      <div class="hcc-fg"><label>Date *</label><input type="date" id="tx-m-date" value="${r.date||today}"/></div>
+      <div class="hcc-fg"><label>Description *</label><input type="text" id="tx-m-desc" value="${txEsc(r.desc||'')}" placeholder="Canva Pro subscription" maxlength="100"/></div>
+      <div class="hcc-fg"><label>Vendor / Paid To</label><input type="text" id="tx-m-vendor" value="${txEsc(r.vendor||'')}" placeholder="Canva" maxlength="100"/></div>
+      <div class="hcc-fg"><label>Amount ($) *</label><input type="number" id="tx-m-amount" value="${r.amount||''}" placeholder="15.00" min="0" step="0.01"/></div>
+      <div class="hcc-fg"><label>Category *</label><select id="tx-m-cat"><option value="">— Select —</option><option ${r.category==='Software & Subscriptions'?'selected':''}>Software &amp; Subscriptions</option><option ${r.category==='Marketing & Advertising'?'selected':''}>Marketing &amp; Advertising</option><option ${r.category==='Home Office'?'selected':''}>Home Office</option><option ${r.category==='Phone & Internet'?'selected':''}>Phone &amp; Internet</option><option ${r.category==='Professional Services'?'selected':''}>Professional Services</option><option ${r.category==='Education & Training'?'selected':''}>Education &amp; Training</option><option ${r.category==='Equipment'?'selected':''}>Equipment</option><option ${r.category==='Bank & Payment Fees'?'selected':''}>Bank &amp; Payment Fees</option><option ${r.category==='Other'?'selected':''}>Other</option></select></div>
+      <div class="hcc-fg" style="align-items:flex-start;"><label>Deductible?</label><div style="display:flex;gap:14px;margin-top:5px;"><label style="display:flex;gap:5px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0;font-weight:400;"><input type="radio" name="tx-deduct" value="1" ${r.deductible!==false?'checked':''}/> Yes</label><label style="display:flex;gap:5px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0;font-weight:400;"><input type="radio" name="tx-deduct" value="0" ${r.deductible===false?'checked':''}/> No</label></div></div>
+      <div class="hcc-fg" style="align-items:flex-start;"><label>Got Receipt?</label><div style="display:flex;gap:14px;margin-top:5px;"><label style="display:flex;gap:5px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0;font-weight:400;"><input type="radio" name="tx-receipt" value="1" ${r.receipt?'checked':''}/> Yes</label><label style="display:flex;gap:5px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0;font-weight:400;"><input type="radio" name="tx-receipt" value="0" ${!r.receipt?'checked':''}/> No</label></div></div>
+      <div class="hcc-fg full"><label>Notes</label><textarea id="tx-m-notes" placeholder="Any notes...">${txEsc(r.notes||'')}</textarea></div>`;
+  }
+  document.getElementById('tx-overlay').classList.add('open');
+}
+function txCloseModal(){document.getElementById('tx-overlay').classList.remove('open');}
+function txSaveEntry(){
+  const date=document.getElementById('tx-m-date').value;
+  const amount=document.getElementById('tx-m-amount').value;
+  if(!date||!amount){hccToast('Please fill in required fields.','red');return;}
+  if(txModalType==='income'){
+    const client=document.getElementById('tx-m-client').value.trim();
+    if(!client){hccToast('Please enter client name.','red');return;}
+    const entry={id:txEditId||txId(),date,client,plan:document.getElementById('tx-m-plan').value,amount:parseFloat(amount),method:document.getElementById('tx-m-method').value,stripe:document.getElementById('tx-m-stripe').value.trim(),desc:document.getElementById('tx-m-desc').value.trim()};
+    if(txEditId){const i=txData.income.findIndex(x=>x.id===txEditId);if(i>-1)txData.income[i]=entry;}else txData.income.unshift(entry);
+  }else{
+    const desc=document.getElementById('tx-m-desc').value.trim();
+    const cat=document.getElementById('tx-m-cat').value;
+    if(!desc||!cat){hccToast('Please fill in description and category.','red');return;}
+    const entry={id:txEditId||txId(),date,desc,vendor:document.getElementById('tx-m-vendor').value.trim(),amount:parseFloat(amount),category:cat,deductible:document.querySelector('[name="tx-deduct"]:checked')?.value==='1',receipt:document.querySelector('[name="tx-receipt"]:checked')?.value==='1',notes:document.getElementById('tx-m-notes')?document.getElementById('tx-m-notes').value.trim():''};
+    if(txEditId){const i=txData.expenses.findIndex(x=>x.id===txEditId);if(i>-1)txData.expenses[i]=entry;}else txData.expenses.unshift(entry);
+  }
+  txSave();txCloseModal();txRenderAll();
+  hccToast(txEditId?'Entry updated!':'Entry saved!','green');
+}
+function txEditEntry(type,id){txOpenModal(type,id);}
+function txDelEntry(type,id){
+  if(!confirm('Delete this entry? Cannot be undone.'))return;
+  if(type==='income')txData.income=txData.income.filter(e=>e.id!==id);
+  else txData.expenses=txData.expenses.filter(e=>e.id!==id);
+  txSave();txRenderAll();hccToast('Deleted.','red');
+}
+function txExportCSV(){
+  const y=txGetYear();
+  const iRows=txData.income.filter(e=>e.date&&new Date(e.date).getFullYear()===y).map(e=>['Income',e.date,e.client,e.plan,'',e.amount,e.method,e.stripe,e.desc].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(','));
+  const eRows=txData.expenses.filter(e=>e.date&&new Date(e.date).getFullYear()===y).map(e=>['Expense',e.date,e.desc,e.vendor,e.category,e.amount,e.deductible?'Yes':'No',e.receipt?'Yes':'No',e.notes].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(','));
+  const{inc,exp,profit,totalTax}=txCalcTotals();
+  const sum=[`\n"YEAR ${y} SUMMARY"`,`"Gross Revenue","${txFmt(inc)}"`,`"Deductible Expenses","${txFmt(exp)}"`,`"Net Profit","${txFmt(profit)}"`,`"Est. Total Tax","${txFmt(totalTax)}"`,`"Est. Take-Home","${txFmt(Math.max(0,profit-totalTax))}"`].join('\n');
+  const csv=['Type,Date,Client/Description,Plan/Vendor,Category,Amount,Method/Deductible,Stripe ID/Receipt,Notes',...iRows,...eRows,sum].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='HCC_Tax_'+y+'.csv';a.click();
+  hccToast('CSV exported for '+y,'green');
+}
+function txRenderAll(){txRenderDashboard();txRenderIncome();txRenderExpenses();txRenderQuarterly();}
+document.getElementById('tx-overlay').addEventListener('click',function(e){if(e.target===this)txCloseModal();});
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+rfLoad(); rfUpdateStats(); rfRenderTable();
+txLoad(); txInitYearSelect(); txPopMonths('tx-incomeMonth'); txRenderAll();
+demoRenderAll();
+dashLoad();
+</script>
+</body>
+</html>
