@@ -6,8 +6,9 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="X-Frame-Options" content="DENY"/>
   <meta name="referrer" content="strict-origin-when-cross-origin"/>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; frame-ancestors 'none'; form-action 'self' mailto:;"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://api.emailjs.com; frame-ancestors 'none'; form-action 'self';"/>
   <title>Request a Refund — Harrisburg Content Co.</title>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" crossorigin="anonymous"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -227,148 +228,6 @@
   <p>© 2026 Harrisburg Content Co. · <a href="index.html">Home</a> · <a href="tel:7174613210">(717) 461-3210</a> · <a href="mailto:dhital.robin33@gmail.com">dhital.robin33@gmail.com</a></p>
 </footer>
 
-<script>
-(function(){
-  'use strict';
-
-  if(location.protocol!=='https:'&&location.hostname!=='localhost'&&!location.hostname.startsWith('127.')){
-    location.replace('https:'+window.location.href.substring(window.location.protocol.length));
-  }
-  if(top!==self){try{top.location=self.location;}catch(e){document.body.innerHTML='';}}
-
-  /* ── Check expiring link from subscription email ── */
-  var params  = new URLSearchParams(window.location.search);
-  var expires = parseInt(params.get('expires'), 10);
-  var urlPlan = params.get('plan');
-  var linkedFromEmail = !!expires;
-
-  if (linkedFromEmail) {
-    if (Date.now() > expires) {
-      // Window has closed — replace page content with expiry message
-      document.querySelector('.hero h1').textContent = '⏰ Refund Window Closed';
-      document.querySelector('.hero p').textContent = 'Your 7-day money-back guarantee window has expired.';
-      var formWrap = document.querySelector('.form-card') || document.getElementById('refundForm');
-      if (formWrap) {
-        formWrap.innerHTML =
-          '<div style="text-align:center;padding:40px 20px;">' +
-          '<div style="font-size:52px;margin-bottom:16px;">⏰</div>' +
-          '<h2 style="font-size:22px;font-weight:900;color:#1a1a2e;margin-bottom:12px;">7-Day Refund Window Expired</h2>' +
-          '<p style="color:#7a7a8c;font-size:15px;line-height:1.7;max-width:480px;margin:0 auto 20px;">' +
-          'Your 7-day money-back guarantee window has passed. Per our refund policy, refunds are not available after this period ' +
-          '<strong>unless we failed to deliver your content within the promised timeframe.</strong></p>' +
-          '<p style="color:#7a7a8c;font-size:15px;line-height:1.7;max-width:480px;margin:0 auto 24px;">' +
-          'If you believe your content was never delivered on time, please contact us directly and we\'ll review your case.</p>' +
-          '<a href="mailto:dhital.robin33@gmail.com?subject=Refund%20Dispute%20-%20Late%20Delivery" ' +
-          'style="display:inline-block;background:#e05c2f;color:#fff;padding:13px 28px;border-radius:30px;text-decoration:none;font-weight:700;font-size:15px;margin-bottom:12px;">' +
-          '📧 Contact Robin About a Dispute</a><br/>' +
-          '<a href="tel:7174613210" style="color:#e05c2f;font-weight:700;font-size:14px;">(717) 461-3210</a>' +
-          '</div>';
-      }
-      return; // stop the rest of the script
-    } else {
-      // Window is valid — show a countdown banner and pre-fill plan
-      var daysLeft = Math.ceil((expires - Date.now()) / (1000 * 60 * 60 * 24));
-      var banner = document.createElement('div');
-      banner.style.cssText = 'background:#e8f7f0;border:2px solid #4caf8a;border-radius:10px;padding:14px 20px;margin-bottom:20px;text-align:center;font-size:14px;font-weight:600;color:#1a5a3a;';
-      banner.innerHTML = '✅ Your 7-day refund window is active — <strong>' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '') + ' remaining</strong>';
-      var formEl = document.getElementById('refundForm');
-      if (formEl) formEl.insertAdjacentElement('beforebegin', banner);
-
-      // Pre-fill plan dropdown if it matches
-      if (urlPlan) {
-        var planSelect = document.getElementById('rf-plan');
-        if (planSelect) {
-          for (var i = 0; i < planSelect.options.length; i++) {
-            if (planSelect.options[i].value.toLowerCase().indexOf(urlPlan.toLowerCase()) !== -1) {
-              planSelect.selectedIndex = i; break;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  const form      = document.getElementById('refundForm');
-  const resultBox = document.getElementById('resultBox');
-  const submitBtn = document.getElementById('submitBtn');
-  let lastSubmit  = 0;
-
-  const emailRe = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-
-  function showResult(type, msg){
-    resultBox.className = 'result-box ' + type;
-    resultBox.innerHTML = msg;
-    resultBox.scrollIntoView({behavior:'smooth', block:'nearest'});
-  }
-
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-
-    /* Honeypot */
-    if(form.querySelector('[name="website_url"]').value) return;
-
-    /* Rate limit */
-    if(Date.now()-lastSubmit < 60000){
-      showResult('error','Please wait before submitting again.'); return;
-    }
-
-    const name   = document.getElementById('rf-name').value.trim();
-    const biz    = document.getElementById('rf-biz').value.trim();
-    const email  = document.getElementById('rf-email').value.trim();
-    const plan   = document.getElementById('rf-plan').value;
-    const amount = document.getElementById('rf-amount').value;
-    const date   = document.getElementById('rf-date').value;
-    const reason = document.getElementById('rf-reason').value;
-    const details= document.getElementById('rf-details').value.trim();
-
-    if(!name)              {showResult('error','Please enter your name.');return;}
-    if(!biz)               {showResult('error','Please enter your business name.');return;}
-    if(!emailRe.test(email)){showResult('error','Please enter a valid email address.');return;}
-    if(!plan)              {showResult('error','Please select your plan.');return;}
-    if(!amount)            {showResult('error','Please select the refund amount type.');return;}
-    if(!date)              {showResult('error','Please enter your approximate payment date.');return;}
-    if(!reason)            {showResult('error','Please select a reason for the refund.');return;}
-
-    /* Build mailto email body */
-    const subject = encodeURIComponent('REFUND REQUEST — ' + biz + ' (' + plan + ')');
-    const body = encodeURIComponent(
-      'REFUND REQUEST\n' +
-      '==============\n\n' +
-      'Client Name: ' + name + '\n' +
-      'Business: ' + biz + '\n' +
-      'Email: ' + email + '\n' +
-      'Plan: ' + plan + '\n' +
-      'Refund Type: ' + amount + '\n' +
-      'Payment Date: ' + date + '\n' +
-      'Reason: ' + reason + '\n\n' +
-      'Additional Details:\n' + (details || 'None provided') + '\n\n' +
-      '---\n' +
-      'Submitted via harrisburgcontentco.com/refund.html\n' +
-      'Date: ' + new Date().toLocaleString()
-    );
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Opening email...';
-
-    /* Open pre-filled email */
-    window.location.href = 'mailto:dhital.robin33@gmail.com?subject=' + subject + '&body=' + body;
-
-    lastSubmit = Date.now();
-
-    setTimeout(function(){
-      showResult('success',
-        '<strong>✅ Your refund request has been prepared!</strong><br/><br/>' +
-        'Your email app should have opened with your request pre-filled. ' +
-        'Just hit <strong>Send</strong> in your email app and Robin will process your refund within 24 hours.<br/><br/>' +
-        'If your email app didn\'t open, please email <a href="mailto:dhital.robin33@gmail.com" style="color:#0a7c4b;font-weight:700;">dhital.robin33@gmail.com</a> ' +
-        'or call <a href="tel:7174613210" style="color:#0a7c4b;font-weight:700;">(717) 461-3210</a> directly.'
-      );
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit Refund Request →';
-      form.reset();
-    }, 1500);
-  });
-})();
-</script>
+<script src="refund-main.js"></script>
 </body>
 </html>
