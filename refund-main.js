@@ -93,6 +93,7 @@
     var name    = document.getElementById('rf-name').value.trim();
     var biz     = document.getElementById('rf-biz').value.trim();
     var email   = document.getElementById('rf-email').value.trim();
+    var phone   = document.getElementById('rf-phone').value.trim();
     var plan    = document.getElementById('rf-plan').value;
     var amount  = document.getElementById('rf-amount').value;
     var date    = document.getElementById('rf-date').value;
@@ -111,17 +112,42 @@
     submitBtn.textContent = '⏳ Submitting...';
     lastSubmit = Date.now();
 
+    /* ── Build one-line import code for Command Center ── */
+    var importData = {
+      name: name, biz: biz, email: email, phone: phone,
+      plan: plan, refundType: amount, reason: reason,
+      date: new Date().toISOString().split('T')[0],
+      paydate: date, details: details || ''
+    };
+    var importCode = btoa(unescape(encodeURIComponent(JSON.stringify(importData))));
+
     /* ── Send via EmailJS using the existing Robin notify template ── */
     var refundParams = {
       client_name:  name,
       client_biz:   '🔴 REFUND REQUEST — ' + biz,
       client_email: email,
-      client_phone: 'Payment Date: ' + date,
+      client_phone: phone || 'Not provided',
       biz_type:     reason,
       plan_name:    plan,
       plan_price:   amount,
       payment_link: 'N/A — Refund Request',
-      client_msg:   'REFUND DETAILS\n--------------\nReason: ' + reason + '\nRefund Type: ' + amount + '\nPayment Date: ' + date + '\nAdditional Details: ' + (details || 'None provided'),
+      client_msg:   'REFUND DETAILS\n' +
+                    '--------------\n' +
+                    'Client:       ' + name + '\n' +
+                    'Business:     ' + biz + '\n' +
+                    'Email:        ' + email + '\n' +
+                    'Phone:        ' + (phone || 'Not provided') + '\n' +
+                    'Plan:         ' + plan + '\n' +
+                    'Refund Type:  ' + amount + '\n' +
+                    'Reason:       ' + reason + '\n' +
+                    'Payment Date: ' + date + '\n' +
+                    'Details:      ' + (details || 'None provided') + '\n\n' +
+                    '--------------------------------------------\n' +
+                    '📋 TO ADD TO COMMAND CENTER:\n' +
+                    'Open HCC Command Center → Refund Requests\n' +
+                    '→ Click "Import from Email"\n' +
+                    '→ Paste this code:\n\n' +
+                    importCode,
       submitted_at: new Date().toLocaleString()
     };
 
